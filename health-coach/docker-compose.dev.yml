@@ -12,6 +12,8 @@ services:
       - "3000:3000"
     networks:
       - app-net
+    depends_on:
+      - ollama
 
   frontend:
     build:
@@ -28,11 +30,11 @@ services:
     tty: true
 
   ollama:
-    image: ollama/ollama
+    build: ./ollama
     ports:
       - "11434:11434"
     volumes:
-      - ollama-data:/root/.ollama
+      - ./ollama/ollama-data:/root/.ollama
     networks:
       - app-net
     deploy:
@@ -40,6 +42,7 @@ services:
         reservations:
           devices:
             - capabilities: [gpu]
+
 
 volumes:
   ollama-data:

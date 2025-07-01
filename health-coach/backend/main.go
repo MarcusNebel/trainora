@@ -1,17 +1,20 @@
 package main
-import "github.com/gofiber/fiber/v2/middleware/cors"
 
 import (
 	"bytes"
 	"encoding/json"
 	"io"
 	"net/http"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
-type AskRequest struct {
-	Prompt string `json:"prompt"`
+type HealthRequest struct {
+	Age    int     `json:"age"`
+	Height int     `json:"height"` // in cm
+	Weight float64 `json:"weight"` // in kg
 }
 
 type OllamaRequest struct {
@@ -19,91 +22,73 @@ type OllamaRequest struct {
 	Prompt string `json:"prompt"`
 }
 
-type OllamaResponse struct {
-	Response string `json:"response"`
-}
-
 func main() {
 	app := fiber.New()
 	app.Use(cors.New())
 
-	app.Post("/ask", func(c *fiber.Ctx) error {
-	var req AskRequest
-	if err := c.BodyParser(&req); err != nil {
-		return c.Status(400).JSON(fiber.Map{"error": "Invalid input"})
-	}
+	api := app.Group("/api") // Alle Routen unter /api
 
-	ollamaPayload := OllamaRequest{
-		Model:  "llama3",
-		Prompt: req.Prompt,
-	}
-
-	payloadBytes, _ := json.Marshal(ollamaPayload)
-	resp, err := http.Post("http://ollama:11434/api/generate", "application/json", bytes.NewBuffer(payloadBytes))
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": "Ollama request failed"})
-	}
-	defer resp.Body.Close()
-
-	var responseText string
-	decoder := json.NewDecoder(resp.Body)
-
-	for {
-		var chunk map[string]interface{}
-		if err := decoder.Decode(&chunk); err == io.EOF {
-			break
-		} else if err != nil {
-			return c.Status(500).JSON(fiber.Map{"error": "Streaming failed"})
+	api.Post("/health-advice", func(c *fiber.Ctx) error {
+		var req HealthRequest
+		if err := c.BodyParser(&req); err != nil {
+			return c.Status(400).JSON(fiber.Map{"error": "Invalid input"})
 		}
 
-		if text, ok := chunk["response"].(string); ok {
-			responseText += text
-		}
-	}
+		// Prompt bauen
+		prompt := "Du bist ein deutschsprachiger Gesundheitscoach. Der Nutzer ist " +
+				strconv.Itoa(req.Age) + " Jahre alt, wiegt " +
+				strconv.FormatFloat(req.Weight, 'f', 1, 64) + " kg und ist " +
+				strconv.Itoa(req.Height) + " cm groß.\n" +
+				"Er möchte gesünder leben.\n\n" +
+				"1. Empfiehl ein gesundes Rezept, das zu ihm passt (einfach, proteinreich, wenige Zutaten).\n" +
+				"2. Schlage eine passende Fitnessübung für zuhause vor (ca. 5–10 Minuten, ohne Geräte).\n\n" +
+				"Antworte **ausschließlich auf Deutsch** und gib die Antwort in **folgender JSON-Struktur** zurück:\n\n" +
+				`{
+			"recipe": {
+				"title": "...",
+				"ingredients": ["..."],
+				"instructions": "..."
+			},
+			"exercise": {
+				"name": "...",
+				"duration": ...,
+				"description": "..."
+			}
+		}`
 
-	return c.JSON(fiber.Map{
-		"response": responseText,
+		ollamaPayload := OllamaRequest{
+			Model:  "llama3",
+			Prompt: prompt,
+		}
+
+		 payloadBytes, _ := json.Marshal(ollamaPayload)
+		resp, err := http.Post("http://ollama:11434/api/generate", "application/json", bytes.NewBuffer(payloadBytes))
+		if err != nil {
+			return c.Status(500).JSON(fiber.Map{"error": "Ollama request failed"})
+		}
+		defer resp.Body.Close()
+
+		decoder := json.NewDecoder(resp.Body)
+		var responseText string
+
+		for {
+			var chunk struct {
+				Response string `json:"response"`
+			}
+			err := decoder.Decode(&chunk)
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				return c.Status(500).JSON(fiber.Map{"error": "Streaming failed: " + err.Error()})
+			}
+			responseText += chunk.Response
+		}
+
+		return c.JSON(fiber.Map{
+			"response": responseText,
+		})
 	})
-})
+
 	app.Listen(":3000")
-
-//summarize
-	app.Post("/summarize", func(c *fiber.Ctx) error {
-	var req AskRequest
-	if err := c.BodyParser(&req); err != nil {
-		return c.Status(400).JSON(fiber.Map{"error": "Invalid input"})
-	}
-
-	ollamaPayload := OllamaRequest{
-		Model:  "llama3",
-		Prompt: "Fasse den folgenden Text kurz und präzise zusammen:\n\n" + req.Prompt,
-	}
-
-	payloadBytes, _ := json.Marshal(ollamaPayload)
-	resp, err := http.Post("http://ollama:11434/api/generate", "application/json", bytes.NewBuffer(payloadBytes))
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": "Ollama request failed"})
-	}
-	defer resp.Body.Close()
-
-	var responseText string
-	decoder := json.NewDecoder(resp.Body)
-
-	for {
-		var chunk map[string]interface{}
-		if err := decoder.Decode(&chunk); err == io.EOF {
-			break
-		} else if err != nil {
-			return c.Status(500).JSON(fiber.Map{"error": "Streaming failed"})
-		}
-
-		if text, ok := chunk["response"].(string); ok {
-			responseText += text
-		}
-	}
-
-	return c.JSON(fiber.Map{
-		"summary": responseText,
-	})
-})
 }
