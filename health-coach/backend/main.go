@@ -18,8 +18,9 @@ type HealthRequest struct {
 }
 
 type OllamaRequest struct {
-	Model  string `json:"model"`
-	Prompt string `json:"prompt"`
+	Model     string `json:"model"`
+	Prompt    string `json:"prompt"`
+	KeepAlive string `json:"keep_alive"`
 }
 
 func main() {
@@ -57,8 +58,9 @@ func main() {
 		}`
 
 		ollamaPayload := OllamaRequest{
-			Model:  "llama3",
-			Prompt: prompt,
+			Model:     "llama3",
+			Prompt:    prompt,
+			KeepAlive: "24h", // oder "true" oder "24h"
 		}
 
 		 payloadBytes, _ := json.Marshal(ollamaPayload)
