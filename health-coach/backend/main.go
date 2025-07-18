@@ -1,96 +1,86 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
-	"io"
-	"net/http"
-	"strconv"
+	"crypto/rand"
+	"encoding/hex"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/joho/godotenv"
+
+	"health-coach/routes"
 )
 
-type HealthRequest struct {
-	Age    int     `json:"age"`
-	Height int     `json:"height"` // in cm
-	Weight float64 `json:"weight"` // in kg
-}
+func ensureEnvFile() error {
+	content := ""
 
-type OllamaRequest struct {
-	Model     string `json:"model"`
-	Prompt    string `json:"prompt"`
-	KeepAlive string `json:"keep_alive"`
+	if _, err := os.Stat(".env"); os.IsNotExist(err) {
+		secret := make([]byte, 32)
+		if _, err := rand.Read(secret); err != nil {
+			return err
+		}
+		secretHex := hex.EncodeToString(secret)
+		content = `SECRET_KEY=` + secretHex + `
+MYSQL_USER=root
+MYSQL_PASSWORD=59LWrt!mDo6GC4
+MYSQL_HOST=mysql
+MYSQL_PORT=3306
+MYSQL_DB=health_coach
+`
+		return os.WriteFile(".env", []byte(content), 0600)
+	}
+
+	dotenv, err := godotenv.Read(".env")
+	if err != nil {
+		return err
+	}
+
+	if dotenv["SECRET_KEY"] == "" {
+		secret := make([]byte, 32)
+		if _, err := rand.Read(secret); err != nil {
+			return err
+		}
+		secretHex := hex.EncodeToString(secret)
+		dotenv["SECRET_KEY"] = secretHex
+		return godotenv.Write(dotenv, ".env")
+	}
+
+	return nil
 }
 
 func main() {
+	// .env ggf. automatisch anlegen
+	if err := ensureEnvFile(); err != nil {
+		panic("Konnte .env nicht anlegen: " + err.Error())
+	}
+	_ = godotenv.Load()
+
 	app := fiber.New()
 	app.Use(cors.New())
 
-	api := app.Group("/api") // Alle Routen unter /api
+	api := app.Group("/api")
 
-	api.Post("/health-advice", func(c *fiber.Ctx) error {
-		var req HealthRequest
-		if err := c.BodyParser(&req); err != nil {
-			return c.Status(400).JSON(fiber.Map{"error": "Invalid input"})
-		}
+	// DB öffnen
+	routes.InitDB()
+    defer routes.Db.Close()
 
-		// Prompt bauen
-		prompt := "Du bist ein deutschsprachiger Gesundheitscoach. Der Nutzer ist " +
-				strconv.Itoa(req.Age) + " Jahre alt, wiegt " +
-				strconv.FormatFloat(req.Weight, 'f', 1, 64) + " kg und ist " +
-				strconv.Itoa(req.Height) + " cm groß.\n" +
-				"Er möchte gesünder leben.\n\n" +
-				"1. Empfiehl ein gesundes Rezept, das zu ihm passt (einfach, proteinreich, wenige Zutaten).\n" +
-				"2. Schlage eine passende Fitnessübung für zuhause vor (ca. 5–10 Minuten, ohne Geräte).\n\n" +
-				"Antworte **ausschließlich auf Deutsch** und gib die Antwort in **folgender JSON-Struktur** zurück:\n\n" +
-				`{
-			"recipe": {
-				"title": "...",
-				"ingredients": ["..."],
-				"instructions": "..."
-			},
-			"exercise": {
-				"name": "...",
-				"duration": ...,
-				"description": "..."
-			}
-		}`
+	// API-Routen registrieren
+	routes.RegisterHealthRoutes(api)
+	routes.RegisterUserRoutes(api)
+	routes.RegisterAuthRoutes(api)
+	routes.RegisterSetupRoutes(api)
+	routes.RegisterOllamaRoutes(api, routes.Db)
+	routes.RegisterGetRoutes(api, routes.Db)
 
-		ollamaPayload := OllamaRequest{
-			Model:     "llama3",
-			Prompt:    prompt,
-			KeepAlive: "24h", // oder "true" oder "24h"
-		}
+	// Hilfsrouten
+	api.Get("/check-email", routes.CheckEmail)
+	api.Get("/check-username", routes.CheckUsername)
 
-		 payloadBytes, _ := json.Marshal(ollamaPayload)
-		resp, err := http.Post("http://ollama:11434/api/generate", "application/json", bytes.NewBuffer(payloadBytes))
-		if err != nil {
-			return c.Status(500).JSON(fiber.Map{"error": "Ollama request failed"})
-		}
-		defer resp.Body.Close()
-
-		decoder := json.NewDecoder(resp.Body)
-		var responseText string
-
-		for {
-			var chunk struct {
-				Response string `json:"response"`
-			}
-			err := decoder.Decode(&chunk)
-			if err == io.EOF {
-				break
-			}
-			if err != nil {
-				return c.Status(500).JSON(fiber.Map{"error": "Streaming failed: " + err.Error()})
-			}
-			responseText += chunk.Response
-		}
-
-		return c.JSON(fiber.Map{
-			"response": responseText,
-		})
-	})
+	// Geschützte Routen (nur eingeloggte Benutzer)
+	private := app.Group("/api/private", routes.AuthMiddleware)
+	private.Get("/me", routes.MeHandler)
+	private.Get("/recipes", routes.MeHandler)
 
 	app.Listen(":3000")
 }

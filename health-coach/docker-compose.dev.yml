@@ -39,13 +39,30 @@ services:
       - app-net
     deploy:
       resources:
+        limits:
+            cpus: '6.0' # Limit CPU usage to 6 cores
+            memory: 32G # Limit memory usage to 32GB
         reservations:
           devices:
             - capabilities: [gpu]
 
+  mysql:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: 59LWrt!mDo6GC4
+      MYSQL_DATABASE: health_coach
+      TZ: Europe/Berlin
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app-net
+
 
 volumes:
-  ollama-data:
+  mysql_data:
 
 networks:
   app-net:

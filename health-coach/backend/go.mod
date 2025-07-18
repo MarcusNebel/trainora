@@ -3,8 +3,14 @@ module health-coach
 go 1.24.4
 
 require (
+	github.com/go-sql-driver/mysql v1.7.0
+	github.com/gofiber/fiber/v2 v2.52.6
+	github.com/joho/godotenv v1.4.0
+	golang.org/x/crypto v0.14.0
+)
+
+require (
 	github.com/andybalholm/brotli v1.1.0 // indirect
-	github.com/gofiber/fiber/v2 v2.52.6 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/klauspost/compress v1.17.9 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
