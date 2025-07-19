@@ -1,24 +1,26 @@
 #!/bin/sh
+MODEL_NAME="gemma3:12b"
 
-# Starte Ollama im Hintergrund zum Pullen
+# 1. Starte temporär Ollama im Hintergrund, damit "pull" funktioniert
 ollama serve > /dev/null 2>&1 &
 OLLAMA_PID=$!
 
-# Warte, bis Port erreichbar ist
+# 2. Warte, bis der Port wirklich offen ist
 until curl -s http://localhost:11434/api/tags > /dev/null; do
-  echo "Warte auf Ollama..."
+  echo "⏳ Warte auf Ollama-API..."
   sleep 1
 done
 
-# Modell laden (nur wenn noch nicht vorhanden)
-if ! ollama list | grep -q llama3; then
-  echo "Lade Modell llama3..."
-  ollama pull llama3
+# 3. Lade Modell, falls nicht vorhanden
+if ! ollama list | grep -q "$MODEL_NAME"; then
+  echo "📥 Modell $MODEL_NAME nicht gefunden. Lade herunter..."
+  ollama pull "$MODEL_NAME"
 fi
 
-# Hintergrund-Ollama beenden
+# 4. Stoppe temporären Ollama-Server
 kill $OLLAMA_PID
 wait $OLLAMA_PID 2>/dev/null
 
-# Jetzt Ollama im Vordergrund starten
+# 5. Starte Ollama-Server im Vordergrund
+echo "🚀 Starte finalen Ollama-Server..."
 exec ollama serve

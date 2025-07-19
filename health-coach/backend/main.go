@@ -65,6 +65,9 @@ func main() {
 	routes.InitDB()
     defer routes.Db.Close()
 
+	// Starte Ollama Healthcheck
+	routes.StartOllamaModelChecker()
+
 	// API-Routen registrieren
 	routes.RegisterHealthRoutes(api)
 	routes.RegisterUserRoutes(api)

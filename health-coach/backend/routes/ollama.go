@@ -147,7 +147,7 @@ Antworte ausschließlich auf Deutsch und gib die Antwort in folgender JSON-Struk
 			KeepAlive string `json:"keep_alive"`
 		}
 		ollamaPayload := OllamaRequest{
-			Model:     "llama3",
+			Model:     "gemma3:12b",
 			Prompt:    prompt,
 			KeepAlive: "24h",
 		}
