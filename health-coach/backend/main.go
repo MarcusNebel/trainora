@@ -75,6 +75,7 @@ func main() {
 	routes.RegisterSetupRoutes(api)
 	routes.RegisterOllamaRoutes(api, routes.Db)
 	routes.RegisterGetRoutes(api, routes.Db)
+	routes.RegisterDeleteAccountRoute(api)
 
 	// Hilfsrouten
 	api.Get("/check-email", routes.CheckEmail)
