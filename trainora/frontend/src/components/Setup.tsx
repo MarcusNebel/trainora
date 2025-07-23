@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import "./css/Setup.css";
@@ -13,6 +14,9 @@ export default function Setup() {
   const navigate = useNavigate();
   const [authorized, setAuthorized] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const dayRef = useRef<HTMLInputElement>(null);
+  const monthRef = useRef<HTMLInputElement>(null);
+  const yearRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     async function checkAuth() {
@@ -199,37 +203,57 @@ export default function Setup() {
       description: "Bitte geben Sie Ihr Geburtsdatum an.",
       content: (
         <div className="input-row">
-          <select
+          <input
+            ref={dayRef}
+            type="number"
+            placeholder="TT"
+            min={1}
+            max={31}
+            maxLength={2}
             value={formData.birthday.day}
-            onChange={(e) => handleChange("birthday", { day: e.target.value })}
-          >
-            <option value="">Tag</option>
-            {[...Array(31)].map((_, i) => (
-              <option key={i + 1} value={String(i + 1).padStart(2, "0")}>
-                {i + 1}
-              </option>
-            ))}
-          </select>
-          <select
+            onChange={(e) => {
+              const val = e.target.value.slice(0, 2);
+              if (/^\d{0,2}$/.test(val)) {
+                handleChange("birthday", { day: val });
+                if (val.length === 2) {
+                  monthRef.current?.focus();
+                }
+              }
+            }}
+            style={{ width: "60px" }}
+          />
+          <input
+            ref={monthRef}
+            type="number"
+            placeholder="MM"
+            min={1}
+            max={12}
+            maxLength={2}
             value={formData.birthday.month}
-            onChange={(e) => handleChange("birthday", { month: e.target.value })}
-          >
-            <option value="">Monat</option>
-            {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-              <option key={m} value={String(m).padStart(2, "0")}>
-                {["Jan", "Feb", "Mär", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"][m - 1]}
-              </option>
-            ))}
-          </select>
-          <select
+            onChange={(e) => {
+              const val = e.target.value.slice(0, 2);
+              if (/^\d{0,2}$/.test(val)) {
+                handleChange("birthday", { month: val });
+                if (val.length === 2) {
+                  yearRef.current?.focus();
+                }
+              }
+            }}
+            style={{ width: "60px" }}
+          />
+          <input
+            ref={yearRef}
+            type="number"
+            placeholder="JJJJ"
+            min={1900}
+            maxLength={4}
             value={formData.birthday.year}
-            onChange={(e) => handleChange("birthday", { year: e.target.value })}
-          >
-            <option value="">Jahr</option>
-            {Array.from({ length: 100 }, (_, i) => 2025 - i).map((y) => (
-              <option key={y} value={String(y)}>{y}</option>
-            ))}
-          </select>
+            onChange={(e) => {
+              const val = e.target.value.slice(0, 4);
+              if (/^\d{0,4}$/.test(val)) handleChange("birthday", { year: val });
+            }}
+            style={{ width: "80px" }}
+          />
         </div>
       ),
     },

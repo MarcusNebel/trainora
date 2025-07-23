@@ -8,13 +8,14 @@ import passwordIconVisible from "../assets/pw_visible.svg";
 import successIcon from "../assets/success.svg";
 
 export default function Register() {
-  const [form, setForm] = useState({ username: "", email: "", password: "" });
+  const [form, setForm] = useState({ username: "", email: "", password: "", confirmPassword: "" });
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
   const [emailStatus, setEmailStatus] = useState("");
   const [usernameStatus, setUsernameStatus] = useState("");
   const [passwordStrength, setPasswordStrength] = useState<{ level: string, color: string }>({ level: "", color: "" });
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
 
@@ -40,6 +41,12 @@ export default function Register() {
     e.preventDefault();
     setLoading(true);
     setMsg("");
+
+    if (form.password !== form.confirmPassword) {
+      setMsg("Die Passwörter stimmen nicht überein.");
+      setLoading(false);
+      return;
+    }
 
     try {
       const res = await fetch("/api/register", {
@@ -128,7 +135,7 @@ export default function Register() {
                 <input
                   name="password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="Passwort"
+                  placeholder="Passwort festlegen"
                   value={form.password}
                   onChange={(e) => {
                     const pwd = e.target.value;
@@ -145,6 +152,30 @@ export default function Register() {
                   className="input-icon clickable"
                   onClick={() => setShowPassword(prev => !prev)}
                   title={showPassword ? "Passwort verbergen" : "Passwort anzeigen"}
+                />
+              </div>
+
+              <div className="input-icon-wrapper">
+                <input
+                  name="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"} // <-- Hier dynamisch!
+                  placeholder="Passwort wiederholen"
+                  value={form.confirmPassword}
+                  onChange={(e) => {
+                    const pwd = e.target.value;
+                    setForm({ ...form, confirmPassword: pwd });
+                    setPasswordStrength(getPasswordStrength(pwd));
+                    setShowConfirmPassword(false);
+                  }}
+                  required
+                  minLength={6}
+                />
+                <img
+                  src={showConfirmPassword ? passwordIconVisible : passwordIconHidden}
+                  alt="Toggle Password"
+                  className="input-icon clickable"
+                  onClick={() => setShowConfirmPassword(prev => !prev)}
+                  title={showConfirmPassword ? "Passwort verbergen" : "Passwort anzeigen"}
                 />
               </div>
 

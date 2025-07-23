@@ -91,3 +91,149 @@ h2 {
   margin-top: 2rem;
   font-weight: 600;
 }
+
+.day-circles {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+.day-circle {
+  width: 40px;
+  height: 40px;
+  background: #eee;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 40px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.day-circle:hover {
+  background: #d5ffd7;
+  color: black;
+}
+.day-circle.active {
+  background: #4caf50;
+  color: white;
+  font-weight: bold;
+}
+.task-card {
+  display: flex;
+  align-items: flex-start;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
+}
+.task-card:hover {
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transform: scale(1.003);
+  cursor: pointer;
+}
+.task-time {
+  min-width: 120px;
+  font-weight: bold;
+  font-size: 1rem;
+  color: #333;
+  margin-right: 1.5rem;
+}
+.task-details {
+  flex: 1;
+}
+.task-details h3 {
+  margin: 0 0 0.3rem;
+  font-size: 1.1rem;
+}
+.task-details p {
+  margin: 0 0 0.5rem;
+  color: #666;
+}
+.duration {
+  font-size: 0.9rem;
+  color: #999;
+}
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.overlay.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+.task-detail-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transform: scale(0.95);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.task-detail-card.show {
+  opacity: 1;
+  transform: scale(1);
+}
+.feedback-section .fb {
+  margin: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.overlay-bg {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none; /* verhindert Klicks während ausgeblendet */
+}
+.overlay-bg.show {
+  opacity: 1;
+  pointer-events: auto; /* erlaubt Klicks wenn sichtbar */
+}
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.detail-header button {
+  margin-bottom: 8px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+.detail-title {
+  margin-bottom: 0;
+  border-bottom: 2px solid #4caf50;
+  padding-bottom: 0.5rem;
+}
+.fb.red { background: #e74c3c; color: white; }
+.fb.orange { background: #e67e22; color: white; }
+.fb.blue { background: #3498db; color: white; }
+.fb.green { background: #2ecc71; color: white; }
+
+@media (max-width: 600px) {
+  .task-card {
+    flex-direction: column;
+  }
+
+  .task-time {
+    margin-right: 0;
+    margin-bottom: 0.5rem;
+  }
+}

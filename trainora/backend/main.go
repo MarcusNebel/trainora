@@ -22,12 +22,12 @@ func ensureEnvFile() error {
 		}
 		secretHex := hex.EncodeToString(secret)
 		content = `SECRET_KEY=` + secretHex + `
-MYSQL_USER=root
-MYSQL_PASSWORD=59LWrt!mDo6GC4
-MYSQL_HOST=mysql
-MYSQL_PORT=3306
-MYSQL_DB=health_coach
-`
+		MYSQL_USER=root
+		MYSQL_PASSWORD=59LWrt!mDo6GC4
+		MYSQL_HOST=mysql
+		MYSQL_PORT=3306
+		MYSQL_DB=trainora
+		`
 		return os.WriteFile(".env", []byte(content), 0600)
 	}
 
@@ -76,6 +76,7 @@ func main() {
 	routes.RegisterOllamaRoutes(api, routes.Db)
 	routes.RegisterGetRoutes(api, routes.Db)
 	routes.RegisterDeleteAccountRoute(api)
+	routes.RegisterPingRoute(api)
 
 	// Hilfsrouten
 	api.Get("/check-email", routes.CheckEmail)

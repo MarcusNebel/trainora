@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS health_coach;
-USE health_coach;
+CREATE DATABASE IF NOT EXISTS trainora;
+USE trainora;
 
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -19,24 +19,28 @@ CREATE TABLE IF NOT EXISTS users (
     setup_completed ENUM('yes', 'no') DEFAULT 'no'
 );
 
-CREATE TABLE recipes (
+CREATE TABLE IF NOT EXISTS tasks (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,                -- Zuordnung zu Nutzer (Fremdschlüssel)
-    title VARCHAR(255) NOT NULL,        -- Rezepttitel
-    ingredients TEXT NOT NULL,           -- Zutaten, z.B. JSON-Array oder Textliste
-    instructions TEXT NOT NULL,          -- Zubereitungsschritte
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    instructions TEXT,
+    estimated_duration_minutes INT,
+    created_by INT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
 );
 
-CREATE TABLE exercises (
+CREATE TABLE IF NOT EXISTS task_schedule (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,                -- Zuordnung zu Nutzer (Fremdschlüssel)
-    name VARCHAR(255) NOT NULL,          -- Übungsname
-    duration INT NOT NULL,                -- Dauer in Sekunden oder Minuten
-    description TEXT NOT NULL,            -- Beschreibung der Übung
+    user_id INT NOT NULL,
+    task_id INT NOT NULL,
+    weekday TINYINT NOT NULL, -- 0 = Sonntag, 6 = Samstag
+    day_period ENUM('morning', 'noon', 'afternoon', 'evening', 'anytime') NOT NULL,
+    week_start_date DATE NOT NULL,
+    feedback TEXT DEFAULT NULL,
+    feedback_option ENUM('none', 'too_hard', 'didnt_like', 'not_possible') DEFAULT 'none',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE
 );
