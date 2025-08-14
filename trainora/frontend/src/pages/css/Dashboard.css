@@ -237,3 +237,36 @@ h2 {
     margin-bottom: 0.5rem;
   }
 }
+
+.feedback-textarea {
+  width: 100%;
+  margin-top: 5px;
+  border-radius: 6px;
+  font-size: 16px;
+  padding: 8px;
+}
+
+.toast {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #4caf50;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  animation: fadeInOut 3s ease forwards;
+  z-index: 2000;
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translate(-50%, 20px); }
+  10% { opacity: 1; transform: translate(-50%, 0); }
+  90% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, 20px); }
+}

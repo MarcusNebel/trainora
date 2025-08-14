@@ -19,3 +19,91 @@
     padding: 1.5rem 1rem 2rem;
   }
 }
+
+.settings-page-head {
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.h1-settings-head {
+  margin-bottom: 10px;
+}
+
+.delete-account-header {
+  border-color: #ff1a1a;
+}
+
+.delete-account-button {
+  padding: 0.6rem 1.4rem;
+  font-size: 1rem;
+  background-color: #f7f7f7;
+  color: #000;
+  border: solid 2px #ff1a1a;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.delete-account-button:hover {
+  background-color: #ff1a1a;
+  color: #fff;
+}
+
+.warning-text {
+  font-size: 0.9rem;
+  margin-top: 1rem;
+  font-weight: bold;
+}
+
+.account-settings {
+  margin-bottom: 2rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.smaler-input-box-width {
+  max-width: 400px;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: solid 1px #ccc;
+  border-radius: 8px;
+  cursor: text;
+}
+
+.password-settings {
+  margin-bottom: 2rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.save-info-btn {
+  padding: 0.6rem 1.4rem;
+  font-size: 1rem;
+  background-color: #2E7D67;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  max-width: 400px;
+}
+
+.clear-birthday-btn {
+  padding: 0.6rem 1.0rem;
+  font-size: 1rem;
+  background-color: #2E7D67;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  max-width: 400px;
+}
+
+.personal-information {
+  margin-bottom: 2rem;
+  display: grid;
+  gap: 1rem;
+}

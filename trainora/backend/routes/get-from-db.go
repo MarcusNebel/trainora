@@ -52,12 +52,12 @@ func RegisterGetRoutes(api fiber.Router, db *sql.DB) {
 
 		// SQL-Abfrage für geplante Tasks der aktuellen Woche
         rows, err := db.Query(`
-            SELECT ts.weekday, t.title, t.description, t.estimated_duration_minutes, ts.day_period
-            FROM task_schedule ts
-            JOIN tasks t ON ts.task_id = t.id
-            WHERE ts.user_id = ? AND ts.week_start_date = ?
-            ORDER BY ts.weekday ASC, FIELD(ts.day_period, 'morning','noon','afternoon','evening','anytime')
-        `, userID, weekStartDate)
+			SELECT ts.weekday, ts.id, t.title, t.description, t.estimated_duration_minutes, ts.day_period
+			FROM task_schedule ts
+			JOIN tasks t ON ts.task_id = t.id
+			WHERE ts.user_id = ? AND ts.week_start_date = ?
+			ORDER BY ts.weekday ASC, FIELD(ts.day_period, 'morning','noon','afternoon','evening','anytime')
+		`, userID, weekStartDate)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error":    "Fehler beim Laden des Wochenplans",
@@ -76,7 +76,7 @@ func RegisterGetRoutes(api fiber.Router, db *sql.DB) {
 		for rows.Next() {
 			var weekday int
 			var t Task
-			err := rows.Scan(&weekday, &t.Title, &t.Description, &t.Duration, &t.DayPeriod)
+			err := rows.Scan(&weekday, &t.ID, &t.Title, &t.Description, &t.Duration, &t.DayPeriod)
 			if err != nil {
 				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 					"error":      "Fehler beim Verarbeiten der Daten",

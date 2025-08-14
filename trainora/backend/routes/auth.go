@@ -129,15 +129,24 @@ func logoutHandler(c *fiber.Ctx) error {
 }
 
 func MeHandler(c *fiber.Ctx) error {
-	sess, err := session.Store.Get(c)
-	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": "Session-Fehler"})
-	}
+    sess, err := session.Store.Get(c)
+    if err != nil {
+        return c.Status(500).JSON(fiber.Map{"error": "Session-Fehler"})
+    }
 
-	userID := sess.Get("user_id")
-	if userID == nil {
-		return c.Status(401).JSON(fiber.Map{"error": "Nicht eingeloggt"})
-	}
+    userID := sess.Get("user_id")
+    if userID == nil {
+        return c.Status(401).JSON(fiber.Map{"error": "Nicht eingeloggt"})
+    }
 
-	return c.JSON(fiber.Map{"user_id": userID})
+    var setupCompleted string
+    err = Db.QueryRow("SELECT setup_completed FROM users WHERE id = ?", userID).Scan(&setupCompleted)
+    if err != nil {
+        return c.Status(500).JSON(fiber.Map{"error": "Fehler beim Laden des Users"})
+    }
+
+    return c.JSON(fiber.Map{
+        "user_id":        userID,
+        "setup_completed": setupCompleted,
+    })
 }

@@ -8,6 +8,7 @@
   width: 100%;
   padding-right: 2.5rem; /* Platz für Icon */
   box-sizing: border-box;
+  cursor: text;
 }
 
 .input-icon {

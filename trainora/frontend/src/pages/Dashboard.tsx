@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import "./css/Dashboard.css";
+import successIcon from "../assets/success.svg";
 
 interface Task {
   id?: number;
@@ -34,7 +35,9 @@ export default function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const [activeDay, setActiveDay] = useState<number>(0); // vorinitialisieren
+  const [activeDay, setActiveDay] = useState<number>(0);
+  const [customFeedback, setCustomFeedback] = useState("");
+  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
   useEffect(() => {
     async function ensureNextWeekPlan() {
@@ -55,25 +58,29 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    async function checkAuth() {
-      try {
-        const res = await fetch("/api/me", { credentials: "include" });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.user_id) {
-            setAuthorized(true);
-          } else {
-            navigate("/login");
+  async function checkAuth() {
+    try {
+      const res = await fetch("/api/me", { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.user_id) {
+          if (data.setup_completed !== "yes") {
+            navigate("/setup");
+            return;
           }
+          setAuthorized(true);
         } else {
           navigate("/login");
         }
-      } catch {
+      } else {
         navigate("/login");
       }
+    } catch {
+      navigate("/login");
     }
-    checkAuth();
-  }, [navigate]);
+  }
+  checkAuth();
+}, [navigate]);
 
   useEffect(() => {
     async function fetchWeekPlan() {
@@ -97,13 +104,37 @@ export default function Dashboard() {
 
   const closeModal = () => {
     setIsVisible(false);
-    setTimeout(() => setSelectedTask(null), 300); // Dauer der CSS-Animation
+    setTimeout(() => setSelectedTask(null), 300);
   };
 
   if (!authorized) return null;
   if (error) return <p className="error">{error}</p>;
 
   const tasksToday = weekPlan[activeDay.toString()] ?? [];
+
+  const sendFeedback = async (option: string) => {
+    if (!selectedTask?.id) return;
+    try {
+      await fetch("/api/set-feedback", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          task_id: selectedTask.id,
+          feedback_option: option,
+          feedback: customFeedback,
+        }),
+      });
+      setCustomFeedback("");
+      closeModal();
+
+      // Toast anzeigen
+      setFeedbackMessage("Feedback gesendet");
+      setTimeout(() => setFeedbackMessage(null), 3000); // nach 3s ausblenden
+    } catch (err) {
+      alert("Feedback konnte nicht gespeichert werden.");
+    }
+  };
 
   return (
     <div className="dashboard-page">
@@ -159,18 +190,27 @@ export default function Dashboard() {
                   </div>
                   <p><strong>Zeitraum:</strong> {dayPeriodTranslations[selectedTask.day_period] ?? selectedTask.day_period}</p>
                   <p>{selectedTask.description}</p>
+                  <br />
                   <p><strong>Dauer:</strong> {selectedTask.duration} Minuten</p>
+                  <br />
                 </div>
                 <div className="feedback-section">
                   <h3>Feedback</h3>
-                  <button className="fb red">❌ Dann kann ich nicht</button>
-                  <button className="fb orange">😕 Hat mir nicht gefallen</button>
-                  <button className="fb blue">💪 War zu anstrengend</button>
-                  <button className="fb green">✅ Alles gut!</button>
+                  <button className="fb orange" onClick={() => sendFeedback("didnt_like")}>😕 Hat mir nicht gefallen</button>
+                  <button className="fb blue"   onClick={() => sendFeedback("too_hard")}>💪 War zu anstrengend</button>
+                  <button className="fb green"  onClick={() => sendFeedback("none")}>✅ Alles gut!</button>
                 </div>
               </div>
             </div>
           </>
+        )}
+
+        {/* Toast-Meldung */}
+        {feedbackMessage && (
+          <div className="toast">
+            {feedbackMessage}
+            <img src={successIcon} style={{ width: "20px", height: "20px", marginLeft: "8px" }} alt="Success Icon" />
+          </div>
         )}
       </div>
     </div>
