@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import "./css/Dashboard.css";
-import successIcon from "../assets/success.svg";
+import successIconWhite from "../assets/success.svg";
+import ErrorIconWhite from "../assets/error.svg";
 
 interface Task {
   id?: number;
@@ -37,7 +38,8 @@ export default function Dashboard() {
   const [isVisible, setIsVisible] = useState(false);
   const [activeDay, setActiveDay] = useState<number>(0);
   const [customFeedback, setCustomFeedback] = useState("");
-  const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+  const [feedbackMessage, setFeedbackMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
+  const [loadingDays, setLoadingDays] = useState<{ [key: number]: boolean }>({});
 
   useEffect(() => {
     async function ensureNextWeekPlan() {
@@ -82,18 +84,35 @@ export default function Dashboard() {
   checkAuth();
 }, [navigate]);
 
-  useEffect(() => {
-    async function fetchWeekPlan() {
-      try {
-        const res = await fetch("/api/get-week-plan", { credentials: "include" });
-        if (!res.ok) throw new Error("Fehler beim Laden des Wochenplans");
-        const data = await res.json();
-        setWeekPlan(data.week_plan);
-      } catch (err: any) {
-        setError(err.message || "Unbekannter Fehler");
+   useEffect(() => {
+    if (!authorized) return;
+
+    const fetchTasksForDay = async () => {
+      const newWeekPlan: WeekPlan = {};
+      const newLoadingDays: { [key: number]: boolean } = {};
+
+      for (let i = 0; i < 7; i++) {
+        newLoadingDays[i] = true;
+        try {
+          const res = await fetch("/api/get-week-plan", { credentials: "include" });
+          if (res.ok) {
+            const data = await res.json();
+            const tasks = data.week_plan[i.toString()] ?? [];
+            newWeekPlan[i.toString()] = tasks;
+            newLoadingDays[i] = tasks.length === 0; // true = noch keine Einträge
+          }
+        } catch {
+          newLoadingDays[i] = true;
+        }
       }
-    }
-    if (authorized) fetchWeekPlan();
+      setWeekPlan(newWeekPlan);
+      setLoadingDays(newLoadingDays);
+    };
+
+    // Sofort ausführen + alle 10 Sekunden wiederholen
+    fetchTasksForDay();
+    const interval = setInterval(fetchTasksForDay, 5000);
+    return () => clearInterval(interval);
   }, [authorized]);
 
   useEffect(() => {
@@ -128,11 +147,19 @@ export default function Dashboard() {
       setCustomFeedback("");
       closeModal();
 
-      // Toast anzeigen
-      setFeedbackMessage("Feedback gesendet");
+      // Toast je nach Feedbacktyp anzeigen
+      let toastType: "success" | "error" = "success";
+      let message = "Feedback gesendet!";
+      if (option === "didnt_like" || option === "too_hard") {
+        toastType = "error";
+        message = "Feedback gespeichert (negativ)";
+      }
+
+      setFeedbackMessage({ text: message, type: toastType });
       setTimeout(() => setFeedbackMessage(null), 3000); // nach 3s ausblenden
     } catch (err) {
-      alert("Feedback konnte nicht gespeichert werden.");
+      setFeedbackMessage({ text: "Feedback konnte nicht gespeichert werden.", type: "error" });
+      setTimeout(() => setFeedbackMessage(null), 3000);
     }
   };
 
@@ -147,7 +174,7 @@ export default function Dashboard() {
             {weekdays.map((day, index) => (
               <div
                 key={index}
-                className={`day-circle ${activeDay === index ? "active" : ""}`}
+                className={`day-circle ${activeDay === index ? "active" : ""} ${loadingDays[index] ? "loading" : ""}`}
                 onClick={() => setActiveDay(index)}
               >
                 {day}
@@ -207,9 +234,15 @@ export default function Dashboard() {
 
         {/* Toast-Meldung */}
         {feedbackMessage && (
-          <div className="toast">
-            {feedbackMessage}
-            <img src={successIcon} style={{ width: "20px", height: "20px", marginLeft: "8px" }} alt="Success Icon" />
+          <div
+            className={`toast ${feedbackMessage.type === "success" ? "toast-success" : "toast-error"}`}
+          >
+            {feedbackMessage.text}
+            <img
+              src={feedbackMessage.type === "success" ? successIconWhite : ErrorIconWhite}
+              style={{ width: "20px", height: "20px", marginLeft: "8px" }}
+              alt={feedbackMessage.type === "success" ? "Success Icon" : "Error Icon"}
+            />
           </div>
         )}
       </div>

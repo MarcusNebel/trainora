@@ -9,15 +9,6 @@ import (
 	"trainora/session"
 )
 
-type Recipe struct {
-	ID           int      `json:"id"`
-	UserID       int64    `json:"user_id"`
-	Title        string   `json:"title"`
-	Ingredients  []string `json:"ingredients"` // JSON-Array im DB-Feld (TEXT)
-	Instructions string   `json:"instructions"`
-	CreatedAt    string   `json:"created_at"`
-}
-
 type Task struct {
 	ID          int    `json:"id"`
 	Title       string `json:"title"`

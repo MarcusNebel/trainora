@@ -117,6 +117,27 @@ h2 {
   color: white;
   font-weight: bold;
 }
+.day-circle.loading {
+  position: relative;
+  border: 3px solid #eee; /* optional Grundborder */
+}
+.day-circle.loading::after {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  width: calc(100% + 8px);
+  height: calc(100% + 8px);
+  border: 3px solid #4caf50;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  box-sizing: border-box;
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
 .task-card {
   display: flex;
   align-items: flex-start;
@@ -254,14 +275,21 @@ h2 {
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  background: #4caf50;
-  color: white;
+  color: #f7f7f7;
   padding: 10px 20px;
   border-radius: 8px;
   font-size: 14px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.2);
   animation: fadeInOut 3s ease forwards;
   z-index: 2000;
+}
+
+.toast-success {
+  background: #4caf50;
+}
+
+.toast-error {
+  background: #f44336;
 }
 
 @keyframes fadeInOut {

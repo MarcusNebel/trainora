@@ -2,11 +2,21 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./css/Settings.css"; 
 import Sidebar from "../components/Sidebar";
-import clearIcon from "../assets/clear.svg"; // Assuming you have a clear icon
+import clearIcon from "../assets/clear.svg";
+import successIconWhite from "../assets/success.svg";
+import ErrorIconWhite from "../assets/error.svg";
 
 export default function Settings() {
   const navigate = useNavigate();
   const [authorized, setAuthorized] = useState(false);
+  const [toast, setToast] = useState<{ text: string; type: "success" | "error" } | null>(null);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deleteModalShow, setDeleteModalShow] = useState(false); // für Animation
+
+  const showToast = (text: string, type: "success" | "error" = "success") => {
+    setToast({ text, type });
+    setTimeout(() => setToast(null), 3000); // nach 3s ausblenden
+  };
 
   const [personalInfo, setPersonalInfo] = useState({
     birthday: { day: "", month: "", year: "" },
@@ -60,17 +70,32 @@ export default function Settings() {
     checkAuthAndLoad();
   }, [navigate]);
 
-  // Account löschen
-  async function handleDeleteAccount() {
-    if (!confirm("Sind Sie sicher, dass Sie Ihr Konto löschen möchten?")) return;
-    const res = await fetch("/api/delete-account", { method: "DELETE", credentials: "include" });
-    if (res.ok) {
-      alert("Ihr Konto wurde erfolgreich gelöscht.");
-      await fetch("/api/logout", { method: "GET", credentials: "include" });
-      navigate("/login");
-    } else {
-      alert("Fehler beim Löschen Ihres Kontos.");
+  useEffect(() => {
+    if (!deleteModalShow && deleteModalVisible) {
+      const timer = setTimeout(() => setDeleteModalVisible(false), 300);
+      return () => clearTimeout(timer);
     }
+  }, [deleteModalShow, deleteModalVisible]);
+
+  // Account löschen
+  async function handleDeleteAccountConfirmed() {
+    setDeleteModalShow(false); // fade-out starten
+    setTimeout(async () => {
+      try {
+        const res = await fetch("/api/delete-account", { method: "DELETE", credentials: "include" });
+        if (res.ok) {
+          showToast("Ihr Konto wurde erfolgreich gelöscht.", "success");
+          await fetch("/api/logout", { method: "GET", credentials: "include" });
+          navigate("/login");
+        } else {
+          showToast("Fehler beim Löschen Ihres Kontos.", "error");
+        }
+      } catch {
+        showToast("Netzwerkfehler beim Löschen.", "error");
+      } finally {
+        setDeleteModalVisible(false);
+      }
+    }, 300); // Zeit für die CSS-Transition
   }
 
   // Persönliche Infos ändern
@@ -82,69 +107,65 @@ export default function Settings() {
     }
   };
 
+  // Persönliche Infos speichern
   async function savePersonalInfo() {
     try {
-      const payload = {
-        ...personalInfo,
-        height_cm: Number(personalInfo.height_cm),
-        weight_kg: Number(personalInfo.weight_kg),
-      };
+      const payload = { ...personalInfo, height_cm: Number(personalInfo.height_cm), weight_kg: Number(personalInfo.weight_kg) };
       const res = await fetch("/api/settings/update-user-info", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (res.ok) alert("Persönliche Informationen gespeichert.");
-      else alert("Fehler beim Speichern.");
+      if (res.ok) showToast("Persönliche Informationen gespeichert.", "success");
+      else showToast("Fehler beim Speichern.", "error");
     } catch {
-      alert("Netzwerkfehler beim Speichern.");
+      showToast("Netzwerkfehler beim Speichern.", "error");
     }
   }
 
   // Passwort ändern
   async function changePassword() {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert("Neue Passwörter stimmen nicht überein.");
+      showToast("Neue Passwörter stimmen nicht überein.", "error");
       return;
     }
-    const res = await fetch("/api/settings/update-password", {
-      method: "POST",
-      credentials: "include",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        old_password: passwordData.oldPassword,
-        new_password: passwordData.newPassword,
-      }),
-    });
-    if (res.ok) {
-      alert("Passwort erfolgreich geändert.");
-      setPasswordData({ oldPassword: "", newPassword: "", confirmPassword: "" });
-    } else {
-      const err = await res.json();
-      alert(err.error || "Fehler beim Ändern des Passworts.");
+    try {
+      const res = await fetch("/api/settings/update-password", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ old_password: passwordData.oldPassword, new_password: passwordData.newPassword }),
+      });
+      if (res.ok) {
+        showToast("Passwort erfolgreich geändert.", "success");
+        setPasswordData({ oldPassword: "", newPassword: "", confirmPassword: "" });
+      } else {
+        const err = await res.json();
+        showToast(err.error || "Fehler beim Ändern des Passworts.", "error");
+      }
+    } catch {
+      showToast("Netzwerkfehler beim Ändern des Passworts.", "error");
     }
   }
 
+  // Kontoinfos speichern
   async function saveAccountInfo() {
     try {
-      const payload = {
-        email: personalInfo.email,
-        username: personalInfo.username,
-      };
+      const payload = { email: personalInfo.email, username: personalInfo.username };
       const res = await fetch("/api/settings/update-account-info", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (res.ok) alert("Kontoinformationen gespeichert.");
+      if (res.ok) showToast("Kontoinformationen gespeichert.", "success");
       else {
         const err = await res.json();
-        alert(err.error || "Fehler beim Speichern.");
+        showToast(err.error || "Fehler beim Speichern.", "error");
       }
     } catch {
-      alert("Netzwerkfehler beim Speichern.");
+      showToast("Netzwerkfehler beim Speichern.", "error");
     }
   }
 
@@ -278,13 +299,41 @@ export default function Settings() {
 
         <div className="delete-account">
           <h2 className="delete-account-header">Konto löschen</h2>
-          <button className="delete-account-button" onClick={handleDeleteAccount}>Konto löschen</button>
+          <button className="delete-account-button" onClick={() => {setDeleteModalVisible(true); setTimeout(() => setDeleteModalShow(true), 10);}}>Konto löschen</button>
           <p className="warning-text">
             Lösche dein Trainora Konto, inklusive aller persönlichen Daten und Inhalte.
             Das Konto wird sofort gelöscht. Eine Löschung Ihres Kontos ist nicht rückgängig zu machen.
           </p>
         </div>
       </div>
+
+      {/* Löschen-Modal */}
+      {deleteModalVisible && (
+        <div className={`modal-overlay ${deleteModalShow ? "show" : ""}`} onClick={() => setDeleteModalShow(false)}>
+          <div className={`modal ${deleteModalShow ? "show" : ""}`} onClick={(e) => e.stopPropagation()}>
+            <h2 className="delete-account-header">Konto löschen?</h2>
+            <p className="warning-text">Alle Daten werden unwiderruflich gelöscht. Bist du sicher?</p>
+            <div className="modal-actions">
+              <button className="btn cancel" onClick={() => setDeleteModalShow(false)}>Abbrechen</button>
+              <button className="btn delete" onClick={handleDeleteAccountConfirmed}>Löschen</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Toast */}
+      {toast && (
+        <div
+          className={`toast ${toast.type === "success" ? "toast-success" : "toast-error"}`}
+        >
+          {toast.text}
+          <img
+            src={toast.type === "success" ? successIconWhite : ErrorIconWhite}
+            style={{ width: "20px", height: "20px", marginLeft: "8px" }}
+            alt={toast.type === "success" ? "Success Icon" : "Error Icon"}
+          />
+        </div>
+      )}
     </div>
   );
 }

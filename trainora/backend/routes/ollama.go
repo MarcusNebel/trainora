@@ -71,7 +71,6 @@ func decryptText(enc string) (string, error) {
 
 // Funktion zur Generierung des Wochenplans inklusive Lock-Mechanismus
 func generateWeekPlan(db *sql.DB, userID int64, weekStartDate string, isNextWeek bool) error {
-	// Lock setzen
 	lockColumn := "is_generating_week"
 	if isNextWeek {
 		lockColumn = "is_generating_next_week"
@@ -80,11 +79,7 @@ func generateWeekPlan(db *sql.DB, userID int64, weekStartDate string, isNextWeek
 	if err != nil {
 		return fmt.Errorf("Fehler beim Setzen des Lock-Flags: %v", err)
 	}
-
-	defer func() {
-		// Lock wieder freigeben
-		db.Exec(fmt.Sprintf(`UPDATE users SET %s = FALSE WHERE id = ?`, lockColumn), userID)
-	}()
+	defer func() { db.Exec(fmt.Sprintf(`UPDATE users SET %s = FALSE WHERE id = ?`, lockColumn), userID) }()
 
 	// Nutzerdaten laden
 	var birthdayEnc, heightEnc, weightEnc, goalEnc, activityEnc, allergiesEnc string
@@ -204,11 +199,7 @@ Only output the JSON object.
 		Prompt    string `json:"prompt"`
 		KeepAlive string `json:"keep_alive"`
 	}
-	ollamaPayload := OllamaRequest{
-		Model:     "gemma3:12b",
-		Prompt:    prompt,
-		KeepAlive: "24h",
-	}
+	ollamaPayload := OllamaRequest{Model: "gemma3:12b", Prompt: prompt, KeepAlive: "24h"}
 	payloadBytes, _ := json.Marshal(ollamaPayload)
 	resp, err := http.Post("http://ollama:11434/api/generate", "application/json", bytes.NewBuffer(payloadBytes))
 	if err != nil {
@@ -217,83 +208,65 @@ Only output the JSON object.
 	defer resp.Body.Close()
 
 	decoder := json.NewDecoder(resp.Body)
-	var responseText strings.Builder
+	var buffer strings.Builder
+
+	// Streaming: Tag für Tag auslesen
 	for {
-		var chunk struct {
-			Response string `json:"response"`
-		}
-		err := decoder.Decode(&chunk)
-		if err == io.EOF {
+		var chunk struct{ Response string `json:"response"` }
+		if err := decoder.Decode(&chunk); err == io.EOF {
 			break
-		}
-		if err != nil {
+		} else if err != nil {
 			return err
 		}
-		responseText.WriteString(chunk.Response)
-	}
 
-	raw := responseText.String()
-	start := strings.Index(raw, "{")
-	end := strings.LastIndex(raw, "}")
-	if start == -1 || end == -1 || end <= start {
-		return errors.New("Keine gültige JSON-Antwort gefunden")
-	}
-	jsonPart := raw[start : end+1]
+		buffer.WriteString(chunk.Response)
+		data := buffer.String()
 
-	type Task struct {
-		Title       string `json:"title"`
-		Description string `json:"description"`
-		Duration    int    `json:"duration"`
-		DayPeriod   string `json:"day_period"`
-	}
-	type WeekPlan map[string][]Task
+		// Prüfen, ob mindestens ein Tag fertig ist
+		for day := 0; day <= 6; day++ {
+			dayKey := fmt.Sprintf(`"%d":`, day)
+			start := strings.Index(data, dayKey)
+			if start == -1 {
+				continue
+			}
+			end := strings.Index(data[start:], "]")
+			if end == -1 {
+				continue // noch nicht vollständig
+			}
+			end += start
+			dayJSON := data[start+len(dayKey) : end+1]
 
-	type OllamaResponse struct {
-		WeekPlan WeekPlan `json:"week_plan"`
-	}
+			// In Tasks parsen
+			var tasks []struct {
+				Title       string `json:"title"`
+				Description string `json:"description"`
+				Duration    int    `json:"duration"`
+				DayPeriod   string `json:"day_period"`
+			}
+			if err := json.Unmarshal([]byte(dayJSON), &tasks); err != nil {
+				fmt.Printf("Tag %d noch unvollständig, Skip\n", day)
+				continue // noch unvollständig
+			}
 
-	var ollamaResp OllamaResponse
-	err = json.Unmarshal([]byte(jsonPart), &ollamaResp)
-	if err != nil {
-		return err
-	}
+			tx, _ := db.Begin()
+			for _, task := range tasks {
+				res, err := tx.Exec(`INSERT INTO tasks (title, description, estimated_duration_minutes, created_by) VALUES (?, ?, ?, ?)`,
+					task.Title, task.Description, task.Duration, userID)
+				if err != nil {
+					fmt.Println("Fehler beim Einfügen der Task:", err)
+					tx.Rollback()
+					continue
+				}
+				taskID, _ := res.LastInsertId()
+				tx.Exec(`INSERT INTO task_schedule (user_id, task_id, weekday, day_period, week_start_date, feedback_option)
+					VALUES (?, ?, ?, ?, ?, 'none')`, userID, taskID, day, task.DayPeriod, weekStartDate)
+			}
+			tx.Commit()
 
-	tx, err := db.Begin()
-	if err != nil {
-		return err
-	}
-
-	for dayStr, tasks := range ollamaResp.WeekPlan {
-		weekday, err := strconv.Atoi(dayStr)
-		if err != nil {
-			tx.Rollback()
-			return err
+			// Schon verarbeitete Daten aus Buffer entfernen
+			buffer.Reset()
+			buffer.WriteString(data[end+1:])
 		}
-		for _, task := range tasks {
-			res, err := tx.Exec(`INSERT INTO tasks (title, description, estimated_duration_minutes, created_by) VALUES (?, ?, ?, ?)`,
-				task.Title, task.Description, task.Duration, userID)
-			if err != nil {
-				tx.Rollback()
-				return err
-			}
-			taskID, err := res.LastInsertId()
-			if err != nil {
-				tx.Rollback()
-				return err
-			}
-			_, err = tx.Exec(`
-                INSERT INTO task_schedule (user_id, task_id, weekday, day_period, week_start_date, feedback_option)
-                VALUES (?, ?, ?, ?, ?, 'none')
-            `, userID, taskID, weekday, task.DayPeriod, weekStartDate)
-			if err != nil {
-				tx.Rollback()
-				return err
-			}
-		}
-	}
-
-	if err := tx.Commit(); err != nil {
-		return err
 	}
 
 	return nil
@@ -321,7 +294,6 @@ func RegisterOllamaRoutes(api fiber.Router, db *sql.DB) {
 
 		weekStartDate := getWeekStartDateOllama(time.Now()).Format("2006-01-02")
 
-		// Wenn bereits generiert, warten
 		for {
 			var isGenerating bool
 			if err := db.QueryRow(`SELECT is_generating_week FROM users WHERE id = ?`, userID).Scan(&isGenerating); err != nil {
@@ -366,7 +338,6 @@ func RegisterOllamaRoutes(api fiber.Router, db *sql.DB) {
 
 		nextWeekStart := getNextWeekStartDate()
 
-		// Prüfen, ob schon Einträge für nächste Woche existieren
 		var count int
 		err := db.QueryRow(`SELECT COUNT(*) FROM task_schedule WHERE user_id = ? AND week_start_date = ?`, userID, nextWeekStart).Scan(&count)
 		if err != nil {
@@ -377,7 +348,6 @@ func RegisterOllamaRoutes(api fiber.Router, db *sql.DB) {
 			return c.JSON(fiber.Map{"message": "Plan für nächste Woche existiert bereits"})
 		}
 
-		// Atomar prüfen und Flag setzen, nur wenn vorher FALSE
 		res, err := db.Exec(`
 			UPDATE users 
 			SET is_generating_next_week = TRUE 
@@ -394,12 +364,8 @@ func RegisterOllamaRoutes(api fiber.Router, db *sql.DB) {
 		}
 
 		fmt.Println("Generierung für nächste Woche in die Warteschlange gesetzt")
+		defer func() { db.Exec(`UPDATE users SET is_generating_next_week = FALSE WHERE id = ?`, userID) }()
 
-		defer func() {
-			db.Exec(`UPDATE users SET is_generating_next_week = FALSE WHERE id = ?`, userID)
-		}()
-
-		// Warten, bis aktuelle Woche fertig generiert ist
 		for {
 			var isGen bool
 			if err := db.QueryRow(`SELECT is_generating_week FROM users WHERE id = ?`, userID).Scan(&isGen); err != nil {
@@ -412,8 +378,6 @@ func RegisterOllamaRoutes(api fiber.Router, db *sql.DB) {
 		}
 
 		fmt.Println("Generierung für nächste Woche startet")
-
-		// Generieren
 		err = generateWeekPlan(db, userID, nextWeekStart, true)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Fehler beim Generieren des Wochenplans", "details": err.Error()})
