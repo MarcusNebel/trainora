@@ -31,3 +31,13 @@
     http://localhost:5173
 
     cmd: npm create vite@latest meine-website -- --template react-ts //projekt erstellen
+
+//App Conection
+    Flutter App not reachable
+
+    cmd:    # Prüfen, ob Netzwerkprofil Privat ist
+            Get-NetConnectionProfile
+
+            # Inbound-Regel für Port 3000 TCP
+            New-NetFirewallRule -DisplayName "Trainora 3000 TCP" -Direction Inbound -LocalPort 3000 -Protocol TCP -Action Allow
+

@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import "./css/Settings.css"; 
 import Sidebar from "../components/Sidebar";
 import clearIcon from "../assets/clear.svg"; // Assuming you have a clear icon
-import { color } from "framer-motion";
 
 export default function Settings() {
   const navigate = useNavigate();

@@ -24,8 +24,6 @@ import (
 // Funktion, um Wochenbeginn (Montag) zu berechnen
 func getWeekStartDateOllama(t time.Time) time.Time {
 	weekday := int(t.Weekday())
-	// In Go: Sonntag = 0, Montag = 1, ..., Samstag = 6
-	// Wir wollen auf Montag zurücksetzen
 	daysToSubtract := (weekday + 6) % 7
 	return t.AddDate(0, 0, -daysToSubtract)
 }
@@ -40,6 +38,7 @@ func getNextWeekStartDate() string {
 	return nextMonday.Format("2006-01-02")
 }
 
+// Funktion zum Entschlüsseln
 func decryptText(enc string) (string, error) {
 	key := os.Getenv("SECRET_KEY")
 	if len(key) != 64 {
@@ -70,17 +69,34 @@ func decryptText(enc string) (string, error) {
 	return string(plain), nil
 }
 
-func generateWeekPlan(db *sql.DB, userID int64, weekStartDate string) error {
-	// Nutzerdaten laden und entschlüsseln (wie in /after-setup)
-	var (
-		birthdayEnc, heightEnc, weightEnc, goalEnc, activityEnc, allergiesEnc string
-	)
-	err := db.QueryRow(`SELECT birthday_encrypted, height_cm_encrypted, weight_kg_encrypted, goal_encrypted, activity_level_encrypted, allergies_encrypted FROM users WHERE id = ?`, userID).
+// Funktion zur Generierung des Wochenplans inklusive Lock-Mechanismus
+func generateWeekPlan(db *sql.DB, userID int64, weekStartDate string, isNextWeek bool) error {
+	// Lock setzen
+	lockColumn := "is_generating_week"
+	if isNextWeek {
+		lockColumn = "is_generating_next_week"
+	}
+	_, err := db.Exec(fmt.Sprintf(`UPDATE users SET %s = TRUE WHERE id = ?`, lockColumn), userID)
+	if err != nil {
+		return fmt.Errorf("Fehler beim Setzen des Lock-Flags: %v", err)
+	}
+
+	defer func() {
+		// Lock wieder freigeben
+		db.Exec(fmt.Sprintf(`UPDATE users SET %s = FALSE WHERE id = ?`, lockColumn), userID)
+	}()
+
+	// Nutzerdaten laden
+	var birthdayEnc, heightEnc, weightEnc, goalEnc, activityEnc, allergiesEnc string
+	err = db.QueryRow(`
+        SELECT birthday_encrypted, height_cm_encrypted, weight_kg_encrypted, goal_encrypted, activity_level_encrypted, allergies_encrypted 
+        FROM users WHERE id = ?`, userID).
 		Scan(&birthdayEnc, &heightEnc, &weightEnc, &goalEnc, &activityEnc, &allergiesEnc)
 	if err != nil {
 		return err
 	}
 
+	// Entschlüsseln
 	birthdayStr, err := decryptText(birthdayEnc)
 	if err != nil {
 		return err
@@ -105,21 +121,14 @@ func generateWeekPlan(db *sql.DB, userID int64, weekStartDate string) error {
 	if time.Now().YearDay() < birthday.YearDay() {
 		age--
 	}
-	height, err := strconv.Atoi(heightStr)
-	if err != nil {
-		return err
-	}
-	weight, err := strconv.ParseFloat(weightStr, 64)
-	if err != nil {
-		return err
-	}
+	height, _ := strconv.Atoi(heightStr)
+	weight, _ := strconv.ParseFloat(weightStr, 64)
 
-	// Feedback der aktuellen Woche abfragen
+	// Feedback abfragen
 	type FeedbackData struct {
 		Feedback       sql.NullString
 		FeedbackOption sql.NullString
 	}
-
 	rows, err := db.Query(`
 		SELECT feedback, feedback_option 
 		FROM task_schedule 
@@ -133,23 +142,18 @@ func generateWeekPlan(db *sql.DB, userID int64, weekStartDate string) error {
 	var feedbackMessages []string
 	for rows.Next() {
 		var fb FeedbackData
-		err := rows.Scan(&fb.Feedback, &fb.FeedbackOption)
-		if err != nil {
+		if err := rows.Scan(&fb.Feedback, &fb.FeedbackOption); err != nil {
 			return err
 		}
 		var parts []string
 		if fb.FeedbackOption.Valid && fb.FeedbackOption.String != "none" {
-			optionText := ""
 			switch fb.FeedbackOption.String {
 			case "too_hard":
-				optionText = "Übungen waren zu anstrengend."
+				parts = append(parts, "Übungen waren zu anstrengend.")
 			case "didnt_like":
-				optionText = "Übungen haben nicht gefallen."
+				parts = append(parts, "Übungen haben nicht gefallen.")
 			case "not_possible":
-				optionText = "Übungen waren nicht möglich durch Umstände."
-			}
-			if optionText != "" {
-				parts = append(parts, optionText)
+				parts = append(parts, "Übungen waren nicht möglich durch Umstände.")
 			}
 		}
 		if fb.Feedback.Valid && fb.Feedback.String != "" {
@@ -165,9 +169,9 @@ func generateWeekPlan(db *sql.DB, userID int64, weekStartDate string) error {
 		feedbackText = "\n\nNutzer-Feedback der aktuellen Woche:\n" + strings.Join(feedbackMessages, "\n")
 	}
 
+	// Prompt für Ollama
 	prompt := fmt.Sprintf(`You are a health coach. The user is %d years old, weighs %.1f kg, is %d cm tall,
-has the goal "%s", an activity level of "%s", and the following allergies: "%s".
-The user wants to live a healthier lifestyle.%s
+has the goal "%s", an activity level of "%s", and the following allergies: "%s".%s
 
 Please create a complete weekly fitness plan with daily tasks for each day of the week, starting with Monday (weekday 1) and ending with Sunday (weekday 0).
 
@@ -181,14 +185,7 @@ Return the response strictly as a JSON object with the following format:
 
 {
 "week_plan": {
-    "0": [  // Monday
-    {
-        "title": "...",
-        "description": "...",
-        "duration": 10,
-        "day_period": "morning"
-    }
-    ],
+    "0": [],
     "1": [],
     "2": [],
     "3": [],
@@ -304,6 +301,8 @@ Only output the JSON object.
 
 func RegisterOllamaRoutes(api fiber.Router, db *sql.DB) {
 	ollama := api.Group("/ollama")
+
+	// After-Setup Route
 	ollama.Post("/after-setup", AuthMiddleware, func(c *fiber.Ctx) error {
 		sess, _ := session.Store.Get(c)
 		userIDRaw := sess.Get("user_id")
@@ -316,22 +315,32 @@ func RegisterOllamaRoutes(api fiber.Router, db *sql.DB) {
 		case float64:
 			userID = int64(v)
 		case string:
-			parsed, err := strconv.ParseInt(v, 10, 64)
-			if err != nil {
-				/* Fehlerbehandlung */
-			}
+			parsed, _ := strconv.ParseInt(v, 10, 64)
 			userID = parsed
-		default:
-			// Fehlerbehandlung
 		}
+
 		weekStartDate := getWeekStartDateOllama(time.Now()).Format("2006-01-02")
-		err := generateWeekPlan(db, userID, weekStartDate)
+
+		// Wenn bereits generiert, warten
+		for {
+			var isGenerating bool
+			if err := db.QueryRow(`SELECT is_generating_week FROM users WHERE id = ?`, userID).Scan(&isGenerating); err != nil {
+				return c.Status(500).JSON(fiber.Map{"error": "DB-Fehler", "details": err.Error()})
+			}
+			if !isGenerating {
+				break
+			}
+			time.Sleep(5 * time.Second)
+		}
+
+		err := generateWeekPlan(db, userID, weekStartDate, false)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Fehler beim Generieren des Wochenplans", "details": err.Error()})
 		}
 		return c.JSON(fiber.Map{"message": "Wochenplan erfolgreich generiert"})
 	})
 
+	// Generate-Next-Week Route
 	ollama.Post("/generate-next-week", AuthMiddleware, func(c *fiber.Ctx) error {
 		sess, _ := session.Store.Get(c)
 		userIDRaw := sess.Get("user_id")
@@ -346,29 +355,70 @@ func RegisterOllamaRoutes(api fiber.Router, db *sql.DB) {
 		case string:
 			parsed, err := strconv.ParseInt(v, 10, 64)
 			if err != nil {
-				/* Fehlerbehandlung */
+				return c.Status(400).JSON(fiber.Map{"error": "Ungültige User-ID"})
 			}
 			userID = parsed
 		default:
-			// Fehlerbehandlung
+			return c.Status(400).JSON(fiber.Map{"error": "Ungültige User-ID"})
 		}
+
+		fmt.Println("Request für nächste Woche erhalten")
+
 		nextWeekStart := getNextWeekStartDate()
 
-		// Prüfen, ob schon Einträge existieren
+		// Prüfen, ob schon Einträge für nächste Woche existieren
 		var count int
 		err := db.QueryRow(`SELECT COUNT(*) FROM task_schedule WHERE user_id = ? AND week_start_date = ?`, userID, nextWeekStart).Scan(&count)
 		if err != nil {
-			return c.Status(500).JSON(fiber.Map{"error": "DB-Fehler", "db_error": err.Error()})
+			return c.Status(500).JSON(fiber.Map{"error": "DB-Fehler", "details": err.Error()})
 		}
 		if count > 0 {
+			fmt.Println("Plan für nächste Woche existiert bereits")
 			return c.JSON(fiber.Map{"message": "Plan für nächste Woche existiert bereits"})
 		}
 
-		// Nur wenn noch kein Plan existiert, generieren!
-		err = generateWeekPlan(db, userID, nextWeekStart)
+		// Atomar prüfen und Flag setzen, nur wenn vorher FALSE
+		res, err := db.Exec(`
+			UPDATE users 
+			SET is_generating_next_week = TRUE 
+			WHERE id = ? AND is_generating_next_week = FALSE
+		`, userID)
+		if err != nil {
+			return c.Status(500).JSON(fiber.Map{"error": "DB-Fehler beim Setzen des Locks", "details": err.Error()})
+		}
+
+		rowsAffected, _ := res.RowsAffected()
+		if rowsAffected == 0 {
+			fmt.Println("Generierung für nächste Woche bereits in Warteschlange")
+			return c.JSON(fiber.Map{"message": "Ein Request für die nächste Woche ist bereits in der Warteschlange"})
+		}
+
+		fmt.Println("Generierung für nächste Woche in die Warteschlange gesetzt")
+
+		defer func() {
+			db.Exec(`UPDATE users SET is_generating_next_week = FALSE WHERE id = ?`, userID)
+		}()
+
+		// Warten, bis aktuelle Woche fertig generiert ist
+		for {
+			var isGen bool
+			if err := db.QueryRow(`SELECT is_generating_week FROM users WHERE id = ?`, userID).Scan(&isGen); err != nil {
+				return c.Status(500).JSON(fiber.Map{"error": "DB-Fehler", "details": err.Error()})
+			}
+			if !isGen {
+				break
+			}
+			time.Sleep(5 * time.Second)
+		}
+
+		fmt.Println("Generierung für nächste Woche startet")
+
+		// Generieren
+		err = generateWeekPlan(db, userID, nextWeekStart, true)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Fehler beim Generieren des Wochenplans", "details": err.Error()})
 		}
-		return c.JSON(fiber.Map{"message": "Wochenplan erfolgreich generiert"})
+
+		return c.JSON(fiber.Map{"message": "Wochenplan für nächste Woche erfolgreich generiert"})
 	})
 }

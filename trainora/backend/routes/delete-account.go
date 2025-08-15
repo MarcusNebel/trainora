@@ -28,16 +28,16 @@ func DeleteAccountHandler(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"error": "Account konnte nicht gelöscht werden"})
 	}
 
-	// Hier wird die Datenbankverbindung verwendet, um die Rezepte zu löschen
-	_, err = Db.Exec("DELETE FROM recipes WHERE user_id = ?", userID)
+	// Hier wird die Datenbankverbindung verwendet, um die Aufgaben zu löschen
+	_, err = Db.Exec("DELETE FROM tasks WHERE created_by = ?", userID)
 	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": "Rezepte konnten nicht gelöscht werden"})
+		return c.Status(500).JSON(fiber.Map{"error": "Aufgaben konnten nicht gelöscht werden"})
 	}
 
-	// Hier wird die Datenbankverbindung verwendet, um die Übungen zu löschen
-	_, err = Db.Exec("DELETE FROM exercises WHERE user_id = ?", userID)
+	// Hier wird die Datenbankverbindung verwendet, um die Aufgabenpläne zu löschen
+	_, err = Db.Exec("DELETE FROM task_schedule WHERE user_id = ?", userID)
 	if err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": "Übungen konnten nicht gelöscht werden"})
+		return c.Status(500).JSON(fiber.Map{"error": "Aufgabenpläne konnten nicht gelöscht werden"})
 	}
 
 	sess.Destroy()

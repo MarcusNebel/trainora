@@ -3,6 +3,8 @@ package main
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"fmt"
+	"net"
 	"os"
 
 	"github.com/gofiber/fiber/v2"
@@ -49,12 +51,31 @@ func ensureEnvFile() error {
 	return nil
 }
 
+func printNetworkInterfaces() {
+	ifaces, err := net.Interfaces()
+	if err != nil {
+		fmt.Println("Fehler beim Lesen der Interfaces:", err)
+		return
+	}
+
+	fmt.Println("Verfügbare Netzwerk-Interfaces:")
+	for _, iface := range ifaces {
+		addrs, _ := iface.Addrs()
+		for _, addr := range addrs {
+			fmt.Printf("- %s: %s\n", iface.Name, addr.String())
+		}
+	}
+}
+
 func main() {
 	// .env ggf. automatisch anlegen
 	if err := ensureEnvFile(); err != nil {
 		panic("Konnte .env nicht anlegen: " + err.Error())
 	}
 	_ = godotenv.Load()
+
+	// Netzwerkinterfaces anzeigen
+	printNetworkInterfaces()
 
 	app := fiber.New()
 	app.Use(cors.New())
@@ -63,7 +84,7 @@ func main() {
 
 	// DB öffnen
 	routes.InitDB()
-    defer routes.Db.Close()
+	defer routes.Db.Close()
 
 	// Starte Ollama Healthcheck
 	routes.StartOllamaModelChecker()
@@ -89,5 +110,8 @@ func main() {
 	private.Get("/me", routes.MeHandler)
 	private.Get("/recipes", routes.MeHandler)
 
-	app.Listen(":3000")
+	fmt.Println("Starte Server auf 0.0.0.0:3000 ...")
+	if err := app.Listen("0.0.0.0:3000"); err != nil {
+		fmt.Println("Fehler:", err)
+	}
 }

@@ -16,7 +16,9 @@ CREATE TABLE IF NOT EXISTS users (
 
     allergies_encrypted BLOB DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    setup_completed ENUM('yes', 'no') DEFAULT 'no'
+    setup_completed ENUM('yes', 'no') DEFAULT 'no',
+    is_generating_week BOOLEAN DEFAULT FALSE,
+    is_generating_next_week BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE IF NOT EXISTS tasks (

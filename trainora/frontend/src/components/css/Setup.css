@@ -116,3 +116,15 @@ input, select {
     transform: rotate(360deg);
   }
 }
+
+.skip-setupgeneration-btn {
+  padding: 0.6rem 1.0rem;
+  font-size: 1rem;
+  background-color: #2E7D67;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  max-width: 400px;
+}

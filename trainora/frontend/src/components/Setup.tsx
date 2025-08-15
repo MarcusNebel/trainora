@@ -190,6 +190,7 @@ export default function Setup() {
             <h2>Erste Daten werden generiert ...</h2>
             <p>Bitte warten Sie einen Moment.</p>
             <div className="spinner"></div>
+            <button className="skip-setupgeneration-btn" onClick={() => { window.location.href = "/dashboard"; }}>Überspringen</button>
           </div>
         </div>
       </div>
