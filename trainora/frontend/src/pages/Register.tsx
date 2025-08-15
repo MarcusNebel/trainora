@@ -5,7 +5,7 @@ import mailIcon from "../assets/mail.svg";
 import userIcon from "../assets/user.svg";
 import passwordIconHidden from "../assets/pw_hidden.svg";
 import passwordIconVisible from "../assets/pw_visible.svg";
-import successIcon from "../assets/success.svg";
+import successIcon from "../assets/successBlack.svg";
 
 export default function Register() {
   const [form, setForm] = useState({ username: "", email: "", password: "", confirmPassword: "" });

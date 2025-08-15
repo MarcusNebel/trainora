@@ -229,6 +229,7 @@ export default function Settings() {
           <div className="input-row" style={{display: "flex", gap: "1rem", justifyContent: "flex-start"}}>
             <input
               type="number"
+              className="smaler-input-box-width"
               placeholder="TT"
               value={personalInfo.birthday.day}
               onChange={e => {
@@ -241,6 +242,7 @@ export default function Settings() {
             />
             <input
               type="number"
+              className="smaler-input-box-width"
               placeholder="MM"
               value={personalInfo.birthday.month}
               onChange={e => {
@@ -253,6 +255,7 @@ export default function Settings() {
             />
             <input
               type="number"
+              className="smaler-input-box-width"
               placeholder="JJJJ"
               value={personalInfo.birthday.year}
               onChange={e => {

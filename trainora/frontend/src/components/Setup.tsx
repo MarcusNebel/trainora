@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import "./css/Setup.css";
@@ -24,35 +23,25 @@ export default function Setup() {
         const res = await fetch("/api/me", { credentials: "include" });
         if (res.ok) {
           const data = await res.json();
-          if (data.user_id) {
-            setAuthorized(true);
-          } else {
-            navigate("/login");
-          }
-        } else {
-          navigate("/login");
-        }
+          if (data.user_id) setAuthorized(true);
+          else navigate("/login");
+        } else navigate("/login");
       } catch {
         navigate("/login");
       }
     }
-
     checkAuth();
   }, [navigate]);
 
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState(1);
   const [formData, setFormData] = useState({
-    birthday: {
-      day: "",
-      month: "",
-      year: "",
-    },
+    birthday: { day: "", month: "", year: "" },
     height_cm: "",
     weight_kg: "",
     activity_level: "",
     goal: "",
-    allergies: ""
+    allergies: "",
   });
   const [errors, setErrors] = useState<string | null>(null);
 
@@ -102,28 +91,23 @@ export default function Setup() {
   const nextStep = () => {
     if (validateStep()) {
       setDirection(1);
-      setStep((s) => s + 1);
+      setStep((s) => Math.min(s + 1, steps.length - 1));
     }
   };
-
   const prevStep = () => {
     setDirection(-1);
-    setStep((s) => s - 1);
+    setStep((s) => Math.max(s - 1, 0));
   };
 
   const handleChange = (field: string, value: any) => {
     if (field === "birthday") {
-      setFormData((prev) => ({
-        ...prev,
-        birthday: { ...prev.birthday, ...value },
-      }));
+      setFormData((prev) => ({ ...prev, birthday: { ...prev.birthday, ...value } }));
     } else {
       setFormData((prev) => ({ ...prev, [field]: value }));
     }
   };
 
   const submitSetup = async () => {
-    console.log("submitSetup gestartet");
     setErrors(null);
     try {
       const payload = {
@@ -132,7 +116,6 @@ export default function Setup() {
         weight_kg: Number(formData.weight_kg),
       };
 
-      console.log("anfrage an setup.go gestartet");
       const response = await fetch("/api/setup", {
         method: "POST",
         credentials: "include",
@@ -149,28 +132,19 @@ export default function Setup() {
       const result = await response.json();
       if (result.message === "success") {
         setGenerating(true);
-
-        console.log("anfrage an setup.go erfolgreich");
-
         try {
-          console.log("anfrage an ollama.go gestartet");
           const genResponse = await fetch("/api/ollama/after-setup", {
             method: "POST",
             credentials: "include",
           });
-
           const genResult = await genResponse.json();
           if (!genResponse.ok) {
             setErrors(genResult.error || "Fehler bei der Generierung");
             setGenerating(false);
             return;
           }
-
-          console.log("🎯 Generierte Inhalte von LLaMA3:", genResult.response);
-          // Optional: Ergebnisse auch in der UI anzeigen
           window.location.href = "/dashboard";
         } catch (genError) {
-          console.error("Fehler bei der Generierung:", genError);
           setErrors("Fehler beim Abrufen der generierten Daten.");
           setGenerating(false);
         }
@@ -184,13 +158,13 @@ export default function Setup() {
 
   if (generating) {
     return (
-      <div className="setup-page">
+      <div className="setup-page mobile">
         <div className="setup-wrapper">
           <div className="setup-card">
-            <h2>Erste Daten werden generiert ...</h2>
-            <p>Bitte warten Sie einen Moment.</p>
+            <h2>Erste Daten werden generiert …</h2>
+            <p className="muted">Wir erstellen personalisierte Inhalte für Sie.</p>
             <div className="spinner"></div>
-            <button className="skip-setupgeneration-btn" onClick={() => { window.location.href = "/dashboard"; }}>Überspringen</button>
+            <button className="btn-setup primary full" onClick={() => (window.location.href = "/dashboard")}>Überspringen</button>
           </div>
         </div>
       </div>
@@ -199,14 +173,15 @@ export default function Setup() {
 
   const steps = [
     {
-      title: "Geburtstag eingeben",
+      title: "Geburtstag",
       icon: calendarIcon,
-      description: "Bitte geben Sie Ihr Geburtsdatum an.",
+      description: "Wann haben Sie Geburtstag?",
       content: (
         <div className="input-row">
           <input
             ref={dayRef}
-            type="number"
+            inputMode="numeric"
+            pattern="[0-9]*"
             placeholder="TT"
             min={1}
             max={31}
@@ -216,16 +191,15 @@ export default function Setup() {
               const val = e.target.value.slice(0, 2);
               if (/^\d{0,2}$/.test(val)) {
                 handleChange("birthday", { day: val });
-                if (val.length === 2) {
-                  monthRef.current?.focus();
-                }
+                if (val.length === 2) monthRef.current?.focus();
               }
             }}
-            style={{ width: "60px" }}
+            className="input small"
           />
           <input
             ref={monthRef}
-            type="number"
+            inputMode="numeric"
+            pattern="[0-9]*"
             placeholder="MM"
             min={1}
             max={12}
@@ -235,16 +209,15 @@ export default function Setup() {
               const val = e.target.value.slice(0, 2);
               if (/^\d{0,2}$/.test(val)) {
                 handleChange("birthday", { month: val });
-                if (val.length === 2) {
-                  yearRef.current?.focus();
-                }
+                if (val.length === 2) yearRef.current?.focus();
               }
             }}
-            style={{ width: "60px" }}
+            className="input small"
           />
           <input
             ref={yearRef}
-            type="number"
+            inputMode="numeric"
+            pattern="[0-9]*"
             placeholder="JJJJ"
             min={1900}
             maxLength={4}
@@ -253,109 +226,96 @@ export default function Setup() {
               const val = e.target.value.slice(0, 4);
               if (/^\d{0,4}$/.test(val)) handleChange("birthday", { year: val });
             }}
-            style={{ width: "80px" }}
+            className="input medium"
           />
         </div>
       ),
     },
     {
-      title: "Größe angeben",
+      title: "Größe",
       icon: heightIcon,
-      description: "Wie groß sind Sie in Zentimetern?",
+      description: "Wie groß sind Sie (cm)?",
       content: (
-        <input
-          type="number"
-          placeholder="z.B. 175"
-          value={formData.height_cm}
-          onChange={(e) => handleChange("height_cm", e.target.value)}
-        />
+        <input className="input" type="number" placeholder="z.B. 175" value={formData.height_cm} onChange={(e) => handleChange("height_cm", e.target.value)} />
       ),
     },
     {
-      title: "Gewicht angeben",
+      title: "Gewicht",
       icon: weightIcon,
-      description: "Wie viel wiegen Sie in Kilogramm?",
+      description: "Wie viel wiegen Sie (kg)?",
       content: (
-        <input
-          type="number"
-          placeholder="z.B. 70"
-          value={formData.weight_kg}
-          onChange={(e) => handleChange("weight_kg", e.target.value)}
-        />
+        <input className="input" type="number" placeholder="z.B. 70" value={formData.weight_kg} onChange={(e) => handleChange("weight_kg", e.target.value)} />
       ),
     },
     {
-      title: "Aktivitätslevel wählen",
+      title: "Aktivität",
       icon: activityIcon,
       description: "Wie aktiv sind Sie im Alltag?",
       content: (
-        <select
-          value={formData.activity_level}
-          onChange={(e) => handleChange("activity_level", e.target.value)}
-        >
-          <option value="">Bitte wählen...</option>
-          <option value="niedrig">Niedrig</option>
-          <option value="mittel">Mittel</option>
-          <option value="hoch">Hoch</option>
-        </select>
+        <div className="segmented">
+          <button className={`seg ${formData.activity_level === "niedrig" ? "active" : ""}`} onClick={() => handleChange("activity_level", "niedrig")}>Niedrig</button>
+          <button className={`seg ${formData.activity_level === "mittel" ? "active" : ""}`} onClick={() => handleChange("activity_level", "mittel")}>Mittel</button>
+          <button className={`seg ${formData.activity_level === "hoch" ? "active" : ""}`} onClick={() => handleChange("activity_level", "hoch")}>Hoch</button>
+        </div>
       ),
     },
     {
-      title: "Ziel eingeben",
+      title: "Ziel",
       icon: goalIcon,
-      description: "Was möchten Sie mit diesem Programm erreichen?",
+      description: "Was ist Ihr Ziel?",
       content: (
-        <input
-          type="text"
-          placeholder="z.B. fitter werden, Muskeln aufbauen"
-          value={formData.goal}
-          onChange={(e) => handleChange("goal", e.target.value)}
-        />
+        <input className="input" type="text" placeholder="z.B. fitter werden" value={formData.goal} onChange={(e) => handleChange("goal", e.target.value)} />
       ),
     },
     {
-      title: "Allergien eingeben",
+      title: "Allergien",
       icon: allergiesIcon,
-      description: "Haben Sie bekannte Allergien?",
+      description: "Haben Sie Allergien?",
       content: (
-        <input
-          type="text"
-          placeholder="z.B. Nüsse, Laktose oder 'Keine'"
-          value={formData.allergies}
-          onChange={(e) => handleChange("allergies", e.target.value)}
-        />
+        <input className="input" type="text" placeholder="z.B. Nüsse, Pollen oder 'Keine'" value={formData.allergies} onChange={(e) => handleChange("allergies", e.target.value)} />
       ),
     },
   ];
 
   return (
-    <div className="setup-page">
+    <div className="setup-page mobile">
       <div className="setup-wrapper">
         <AnimatePresence mode="wait">
           <motion.div
             key={step}
             className="setup-card"
-            initial={{ x: direction === 1 ? 300 : -300, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: direction === 1 ? -300 : 300, opacity: 0 }}
-            transition={{ duration: 0.4 }}
+            initial={{ x: direction === 1 ? 300 : -300, opacity: 0, scale: 0.98 }}
+            animate={{ x: 0, opacity: 1, scale: 1 }}
+            exit={{ x: direction === 1 ? -300 : 300, opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.32 }}
           >
-            <h2>{steps[step].title}</h2>
-            <img src={steps[step].icon} className="icon-animated" alt="Icon" />
-            <p>{steps[step].description}</p>
+            <div className="progress-row">
+              <div className="dots">
+                {steps.map((_, i) => (
+                  <div key={i} className={`dot ${i === step ? "active" : i < step ? "done" : ""}`} />
+                ))}
+              </div>
+              <div className="step-count">{step + 1}/{steps.length}</div>
+            </div>
+
+            <div className="icon-wrap">
+              <img src={steps[step].icon} alt="icon" className="icon-animated" />
+            </div>
+
+            <h2 className="card-title">{steps[step].title}</h2>
+            <p className="muted">{steps[step].description}</p>
+
             <div className="setup-content">{steps[step].content}</div>
+
             {errors && <p className="setup-error">{errors}</p>}
-            <div className="setup-buttons">
-              <div style={{ flex: 1 }}>
-                {step > 0 && <button onClick={prevStep}>Zurück</button>}
-              </div>
-              <div>
-                {step < steps.length - 1 ? (
-                  <button onClick={nextStep}>Weiter</button>
-                ) : (
-                  <button onClick={submitSetup}>Abschließen</button>
-                )}
-              </div>
+
+            <div className="setup-buttons bottom">
+              <button className="btn-setup secondary" onClick={prevStep} disabled={step === 0}>Zurück</button>
+              {step < steps.length - 1 ? (
+                <button className="btn-setup primary" onClick={nextStep}>Weiter</button>
+              ) : (
+                <button className="btn-setup primary" onClick={submitSetup}>Abschließen</button>
+              )}
             </div>
           </motion.div>
         </AnimatePresence>
