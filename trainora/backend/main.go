@@ -100,6 +100,8 @@ func main() {
 	routes.RegisterPingRoute(api)
 	routes.RegisterFeedbackRoutes(api, routes.Db)
 	routes.RegisterSettingsRoutes(api, routes.Db)
+	
+	routes.RegisterMailRoutes(api)
 
 	// Hilfsrouten
 	api.Get("/check-email", routes.CheckEmail)

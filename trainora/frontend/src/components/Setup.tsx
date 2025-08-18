@@ -17,6 +17,17 @@ export default function Setup() {
   const monthRef = useRef<HTMLInputElement>(null);
   const yearRef = useRef<HTMLInputElement>(null);
 
+  const handleEnter = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (step < steps.length - 1) {
+        nextStep();
+      } else {
+        submitSetup();
+      }
+    }
+  };
+
   useEffect(() => {
     async function checkAuth() {
       try {
@@ -187,6 +198,7 @@ export default function Setup() {
             max={31}
             maxLength={2}
             value={formData.birthday.day}
+            onKeyDown={handleEnter}
             onChange={(e) => {
               const val = e.target.value.slice(0, 2);
               if (/^\d{0,2}$/.test(val)) {
@@ -205,6 +217,7 @@ export default function Setup() {
             max={12}
             maxLength={2}
             value={formData.birthday.month}
+            onKeyDown={handleEnter}
             onChange={(e) => {
               const val = e.target.value.slice(0, 2);
               if (/^\d{0,2}$/.test(val)) {
@@ -222,6 +235,7 @@ export default function Setup() {
             min={1900}
             maxLength={4}
             value={formData.birthday.year}
+            onKeyDown={handleEnter}
             onChange={(e) => {
               const val = e.target.value.slice(0, 4);
               if (/^\d{0,4}$/.test(val)) handleChange("birthday", { year: val });
@@ -236,7 +250,14 @@ export default function Setup() {
       icon: heightIcon,
       description: "Wie groß sind Sie (cm)?",
       content: (
-        <input className="input" type="number" placeholder="z.B. 175" value={formData.height_cm} onChange={(e) => handleChange("height_cm", e.target.value)} />
+        <input
+          className="input"
+          type="number"
+          placeholder="z.B. 175"
+          value={formData.height_cm}
+          onKeyDown={handleEnter}
+          onChange={(e) => handleChange("height_cm", e.target.value)}
+        />
       ),
     },
     {
@@ -244,7 +265,14 @@ export default function Setup() {
       icon: weightIcon,
       description: "Wie viel wiegen Sie (kg)?",
       content: (
-        <input className="input" type="number" placeholder="z.B. 70" value={formData.weight_kg} onChange={(e) => handleChange("weight_kg", e.target.value)} />
+        <input
+          className="input"
+          type="number"
+          placeholder="z.B. 70"
+          value={formData.weight_kg}
+          onKeyDown={handleEnter}
+          onChange={(e) => handleChange("weight_kg", e.target.value)}
+        />
       ),
     },
     {
@@ -252,10 +280,25 @@ export default function Setup() {
       icon: activityIcon,
       description: "Wie aktiv sind Sie im Alltag?",
       content: (
-        <div className="segmented">
-          <button className={`seg ${formData.activity_level === "niedrig" ? "active" : ""}`} onClick={() => handleChange("activity_level", "niedrig")}>Niedrig</button>
-          <button className={`seg ${formData.activity_level === "mittel" ? "active" : ""}`} onClick={() => handleChange("activity_level", "mittel")}>Mittel</button>
-          <button className={`seg ${formData.activity_level === "hoch" ? "active" : ""}`} onClick={() => handleChange("activity_level", "hoch")}>Hoch</button>
+        <div className="segmented" onKeyDown={handleEnter} tabIndex={0}>
+          <button
+            className={`seg ${formData.activity_level === "niedrig" ? "active" : ""}`}
+            onClick={() => handleChange("activity_level", "niedrig")}
+          >
+            Niedrig
+          </button>
+          <button
+            className={`seg ${formData.activity_level === "mittel" ? "active" : ""}`}
+            onClick={() => handleChange("activity_level", "mittel")}
+          >
+            Mittel
+          </button>
+          <button
+            className={`seg ${formData.activity_level === "hoch" ? "active" : ""}`}
+            onClick={() => handleChange("activity_level", "hoch")}
+          >
+            Hoch
+          </button>
         </div>
       ),
     },
@@ -264,7 +307,14 @@ export default function Setup() {
       icon: goalIcon,
       description: "Was ist Ihr Ziel?",
       content: (
-        <input className="input" type="text" placeholder="z.B. fitter werden" value={formData.goal} onChange={(e) => handleChange("goal", e.target.value)} />
+        <input
+          className="input"
+          type="text"
+          placeholder="z.B. fitter werden"
+          value={formData.goal}
+          onKeyDown={handleEnter}
+          onChange={(e) => handleChange("goal", e.target.value)}
+        />
       ),
     },
     {
@@ -272,7 +322,14 @@ export default function Setup() {
       icon: allergiesIcon,
       description: "Haben Sie Allergien?",
       content: (
-        <input className="input" type="text" placeholder="z.B. Nüsse, Pollen oder 'Keine'" value={formData.allergies} onChange={(e) => handleChange("allergies", e.target.value)} />
+        <input
+          className="input"
+          type="text"
+          placeholder="z.B. Nüsse, Pollen oder 'Keine'"
+          value={formData.allergies}
+          onKeyDown={handleEnter}
+          onChange={(e) => handleChange("allergies", e.target.value)}
+        />
       ),
     },
   ];

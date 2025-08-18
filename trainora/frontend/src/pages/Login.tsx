@@ -14,6 +14,10 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const [rememberMe, setRememberMe] = useState(false);
+  const [cooldown, setCooldown ] = useState(0);
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  
+  const delays = [3, 5, 10, 30, 60];
 
   useEffect(() => {
     fetch("/api/me", {
@@ -34,13 +38,20 @@ export default function Login() {
   const handleChange = e =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Wenn noch Cooldown aktiv → abbrechen
+    if (cooldown > 0) {
+      setMsg(`Bitte warte noch ${cooldown} Sekunden...`);
+      return;
+    }
+
     setLoading(true);
     setMsg("");
 
     try {
-      const res = await fetch(`/api/login?remember=${rememberMe}`, {
+      const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -50,21 +61,39 @@ export default function Login() {
       const data = await res.json();
 
       if (res.ok && data.message?.toLowerCase().includes("erfolg")) {
-        // 👇 Weiterleitung abhängig vom Setup-Status
+        // ✅ Login erfolgreich
+        setFailedAttempts(0);
+        setCooldown(0);
+        setMsg("Login erfolgreich! Weiterleitung...");
+
+        // Weiterleitung
         setTimeout(() => {
-          setLoading(false);
-          if (data.setup_completed === "yes") {
-            navigate("/dashboard");
-          } else {
-            navigate("/setup");
-          }
-        }, 1000);
+          window.location.href = "/dashboard";
+        }, 1500);
       } else {
-        setMsg(data.error || "Ein Fehler ist aufgetreten");
-        setLoading(false);
+        // ❌ Fehlversuch
+        setMsg(data.error || "Login fehlgeschlagen");
+
+        setFailedAttempts((prev) => {
+          const next = prev + 1;
+          const wait = delays[Math.min(next - 1, delays.length - 1)];
+
+          setCooldown(wait);
+
+          // Countdown runterzählen
+          let t = wait;
+          const interval = setInterval(() => {
+            t--;
+            setCooldown(t);
+            if (t <= 0) clearInterval(interval);
+          }, 1000);
+
+          return next;
+        });
       }
-    } catch (err) {
+    } catch {
       setMsg("Netzwerkfehler");
+    } finally {
       setLoading(false);
     }
   };
@@ -124,8 +153,8 @@ export default function Login() {
             </div>
 
             {/* Button */}
-            <button type="submit" className="btn btn-primary" disabled={loading}>
-                {loading ? "Anmelden..." : "Anmelden"}
+            <button type="submit" className="btn btn-primary" disabled={loading || cooldown > 0}>
+              {cooldown > 0 ? `Warten (${cooldown}s)` : loading ? "Anmelden..." : "Anmelden"}
             </button>
 
             {/* Feedback */}
