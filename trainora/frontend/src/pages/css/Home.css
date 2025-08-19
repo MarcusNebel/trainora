@@ -1,201 +1,196 @@
-.home {
+.home-page {
   font-family: 'Nunito', Arial, sans-serif;
   color: #2E7D67;
 }
 
-.hero {
+.home-page h1,
+.home-page h2,
+.home-page h3 {
+  font-weight: 700;
+  color: #111827;
+}
+
+.home-page p {
+  color: #4b5563;
+}
+
+.navbar {
+  display: grid;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  min-height: 75px;
+  background: white;
+  border-bottom: 1px solid #ddd;
+  z-index: 1000;
+  padding: 0.75rem 2rem;
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar .navbar-container .logo-trainora-text img {
+  max-width: 100%;
+  width: 75px;
+  animation: float 4s ease-in-out infinite;
+}
+
+.navbar .navbar-container .logo-trainora-text {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  background: linear-gradient(90deg, #e2f7d5 60%, #a5d6b7 100%);
-  border-radius: 18px;
-  padding: 3rem 2rem 2rem 2rem;
-  margin-bottom: 2.5rem;
-  gap: 2rem;
-  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
-.hero-content {
-  flex: 2;
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
 }
 
-.hero-content h1 {
-  font-size: 2.7rem;
-  margin-bottom: 1rem;
-  color: #2E7D67;
-}
-
-.hero-sub {
-  font-size: 1.3rem;
-  margin-bottom: 2rem;
-  color: #424242;
-  opacity: 0.85;
-}
-
-.hero-actions {
+.nav-links {
   display: flex;
-  gap: 1.2rem;
+  list-style: none;
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0;
 }
 
-.btn {
-  padding: 0.8rem 1.6rem;
-  border-radius: 12px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
+.nav-links a {
   text-decoration: none;
-  transition: background 0.2s, color 0.2s;
+  color: #333;
 }
 
-.btn-primary {
-  background: #2E7D67;
-  color: #fff;
+.nav-links .btn-primary {
+  padding: 0.5rem 1rem;
 }
 
-.btn-primary:hover {
-  background: #256c56;
+.nav-links .btn-secondary {
+  padding: 14.4px 16px;
 }
 
-.btn-secondary {
-  background: #e2f7d5;
-  color: #2E7D67;
-  border: 2px solid #2E7D67;
+.nav-links .btn-secondary {
+  padding: 0.5rem 1rem;
+  background: #4b5563;
+  color: white;
+  border: none;
+  border-radius: 0.375rem;
+  transition: background 0.3s ease;
 }
 
-.btn-secondary:hover {
-  background: #c8e6c9;
+.nav-links .btn-secondary:hover {
+  background: #374151;
 }
 
-.hero-visual {
-  flex: 1;
+/* === Hero-Section === */
+.home-page .hero {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 5rem 2rem;
+  background: #f7f7f7;
+  margin-top: 4.75rem;
+  margin-bottom: 0;
 }
 
-.hero-emoji {
-  font-size: 5rem;
-  filter: drop-shadow(0 2px 8px #a5d6b7);
-}
-
-.features {
-  margin-bottom: 2.5rem;
-}
-
-.features-grid {
+.home-page .hero-content {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  align-items: center;
+  text-align: center;
+  gap: 1rem;
+}
+
+.home-page .hero-content h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0rem;
+}
+
+.home-page .hero-content p {
+  font-size: 1.25rem;
+  margin-bottom: 0rem;
+}
+
+/* === About-Trainora === */
+.home-page .about-trainora {
+  max-width: 900px;
+  margin: 5rem auto;
+  margin-top: 0rem;
+  padding: 3rem;
+  background: #fff;
+  border-radius: 1.5rem;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  text-align: center;
+}
+
+.home-page .about-trainora h2 {
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
+  color: #1f2937;
+}
+
+.home-page .about-trainora p {
+  margin-bottom: 1rem;
+  font-size: 1.05rem;
+}
+
+/* === Features === */
+.home-page .features {
+  padding: 5rem 10%;
+}
+
+.home-page .section-title {
+  text-align: center;
+  margin-bottom: 3rem;
+  font-size: 2rem;
+  color: #111827;
+}
+
+.home-page .features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 2rem;
 }
 
-.feature-tile {
+.home-page .feature-tile {
   background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 2px 12px rgba(44, 62, 80, 0.07);
-  padding: 2rem 1.2rem 1.2rem 1.2rem;
+  padding: 2rem;
+  border-radius: 1.5rem;
   text-align: center;
-  cursor: pointer;
-  transition: box-shadow 0.2s, transform 0.2s;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.feature-tile:hover {
-  box-shadow: 0 6px 24px rgba(44, 62, 80, 0.13);
-  transform: translateY(-4px) scale(1.03);
+.home-page .feature-tile:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.12);
 }
 
-.feature-icon {
-  font-size: 2.2rem;
-  margin-bottom: 0.7rem;
-  display: block;
+.home-page .feature-icon-img {
+  width: 80px;
+  margin-bottom: 1rem;
 }
 
-.hero-img {
-  width: 100%;
-  max-width: 220px;
-  height: auto;
-  display: block;
-  margin: 0 auto;
+.home-page .feature-tile h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.75rem;
+  color: #1f2937;
 }
 
-.feature-icon-img {
-  width: 48px;
-  height: 48px;
-  object-fit: contain;
-  margin-bottom: 0.7rem;
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
-
+/* === Responsive === */
 @media (max-width: 900px) {
-  .hero {
+  .home-page .hero {
     flex-direction: column;
     text-align: center;
-    padding: 2rem 1rem;
-    gap: 1.5rem;
+    padding: 3rem 2rem;
   }
-  .hero-content {
-    width: 100%;
-    align-items: center;
-    justify-content: center;
-  }
-  .hero-visual {
-    margin-top: 1.2rem;
-    justify-content: center;
-    width: 100%;
-  }
-  .hero-emoji {
-    font-size: 3.5rem;
-  }
-  .hero-actions {
-    flex-direction: column;
-    gap: 0.8rem;
-    align-items: center;
-  }
-  .hero-content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  .hero-visual {
-    order: -1; /* Bild nach oben */
-    margin-bottom: 1.2rem;
-  }
-}
 
-@media (max-width: 600px) {
-  .hero {
-    padding: 1.2rem 0.5rem;
+  .home-page .hero-content {
+    max-width: 100%;
   }
-  .hero-emoji {
-    font-size: 2.5rem;
-  }
-  .hero-content h1 {
-    font-size: 2rem;
-  }
-  .hero-sub {
-    font-size: 1.05rem;
-  }
-}
 
-.home-page {
-  flex: 1;
-  padding: 2rem;
-  padding-top: 3rem; /* Platz für Hamburger auf mobile */
-  transition: margin-left 0.3s ease;
-}
-
-/* Auf großen Bildschirmen: Platz lassen für Sidebar */
-@media (min-width: 769px) {
-  .home-page {
-    padding-top: 2rem;
-  }
-}
-
-/* Optional: für sehr kleine Bildschirme zusätzlich scrollbar machen */
-@media (max-width: 768px) {
-  .home-page {
-    padding: 1.5rem 1rem 2rem;
+  .home-page .hero-visual {
+    margin-top: 2rem;
   }
 }

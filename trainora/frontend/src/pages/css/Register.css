@@ -61,6 +61,18 @@
   cursor: not-allowed;
 }
 
+.btn.btn-secondary {
+  background: #fff;
+  color: #000;
+  border: solid 2px #2E7D67;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  margin-left: 15px;
+  font-size: 1.07rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
 .register-msg {
   margin-top: 0.7rem;
   font-size: 1rem;

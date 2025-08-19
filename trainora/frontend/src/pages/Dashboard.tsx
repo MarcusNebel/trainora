@@ -167,7 +167,7 @@ export default function Dashboard() {
     <div className="dashboard-page">
       <Sidebar />
       <div className="content">
-        <h1>Dein Wochenplan</h1>
+        <h1 className="h1-dashboard">Dein Wochenplan</h1>
 
         <div className="timeline-container">
           <div className="day-circles">

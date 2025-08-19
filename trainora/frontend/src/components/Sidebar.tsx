@@ -95,15 +95,6 @@ export default function Sidebar() {
               Rezepte
             </NavLink>
           </li>
-          <li>
-            <NavLink
-              to="/about-us"
-              onClick={() => setOpen(false)}
-              className={({ isActive }) => isActive ? "active-link" : ""}
-            >
-              Über uns
-            </NavLink>
-          </li>
         </ul>
 
         <div className="sidebar-foot">
