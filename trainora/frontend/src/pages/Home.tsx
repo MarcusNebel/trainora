@@ -1,34 +1,14 @@
 import "./css/Home.css";
-import { Link } from "react-router-dom";
-import heroVisual from "../../public/App-Icon-Black.svg";
 import featureRecipe from "../assets/feature-recipe.svg";
 import featureWorkout from "../assets/feature-workout.svg";
 import featureAi from "../assets/feature-ai.svg";
 import featurePrivacy from "../assets/feature-privacy.svg";
+import Navbar from "../components/Navbar";
 
 export default function Home() {
   return (
     <div className="home-page">
-      {/* Navbar */}
-      <nav className="navbar">
-        <div className="navbar-container">
-          <div className="logo-trainora-text">
-            <img src={heroVisual} alt="Trainora Illustration" />
-            <h1 className="logo">Trainora</h1>
-          </div>
-          <ul className="nav-links">
-            <li>
-              <Link to="/register" className="btn btn-primary">
-                Jetzt starten
-              </Link>
-
-              <Link to="/login" className="btn btn-secondary">
-                Anmelden
-              </Link>
-            </li>
-          </ul>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Hero-Section */}
       <section className="hero">

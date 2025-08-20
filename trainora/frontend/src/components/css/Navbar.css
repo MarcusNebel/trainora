@@ -1,0 +1,76 @@
+.navbar {
+  display: grid;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  min-height: 75px;
+  background: white;
+  border-bottom: 1px solid #ddd;
+  z-index: 1000;
+  padding: 0.75rem 2rem;
+}
+
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar .navbar-container .logo-trainora-text img {
+  max-width: 100%;
+  width: 75px;
+  animation: float 4s ease-in-out infinite;
+  cursor: pointer;
+}
+
+.navbar .navbar-container .logo-trainora-text {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 1.5rem;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #333;
+}
+
+.nav-links .btn-register {
+  padding: 0.5rem 1rem;
+}
+
+.nav-links .btn-register {
+  padding: 0.75rem 1rem;
+  background: #2E7D67;
+  color: #fff;
+  border: solid 2px #2E7D67;
+  border-radius: 12px;
+  transition: background 0.3s ease;
+  margin-right: 15px;
+}
+
+.nav-links .btn-login {
+  padding: 14.4px 16px;
+}
+
+.nav-links .btn-login {
+  padding: 0.75rem 1rem;
+  background: #fff;
+  color: #000;
+  border: solid 2px #2E7D67;
+  border-radius: 12px;
+  transition: background 0.3s ease;
+}

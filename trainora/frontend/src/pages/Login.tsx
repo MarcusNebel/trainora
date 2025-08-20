@@ -6,6 +6,7 @@ import "./css/Login.css";
 import userIcon from "../assets/user.svg";
 import passwordIconHidden from "../assets/pw_hidden.svg";
 import passwordIconVisible from "../assets/pw_visible.svg";
+import Navbar from "../components/Navbar";
 
 export default function Login() {
   const [form, setForm] = useState({ login: "", password: "" });
@@ -99,10 +100,11 @@ export default function Login() {
   };
 
   return (
-    <div className="register-page">
-      <div className="register-tile">
+    <div className="login-page">
+      <div className="login-tile">
+        <Navbar />
         <h2>Anmelden</h2>
-        <form onSubmit={handleSubmit} className="register-form">
+        <form onSubmit={handleSubmit} className="login-form">
             <div className="input-icon-wrapper">
                 <input
                 name="login"
@@ -141,6 +143,10 @@ export default function Login() {
                 />
             </div>
 
+            <div style={{ marginTop: "0.25rem", textAlign: "center", fontSize: "1rem" }}>
+              <Link style={{ textDecoration: "none", color: "#2E7D67", fontWeight: "bold" }} to="/forgot-password">Passwort vergessen?</Link>
+            </div>
+
             <div className="remember-me">
                 <input
                     type="checkbox"
@@ -158,7 +164,7 @@ export default function Login() {
             </button>
 
             {/* Feedback */}
-            {msg && <div className={`register-msg${msg.toLowerCase().includes("erfolg") ? " success" : " error"}`}>{msg}</div>}
+            {msg && <div className={`login-msg${msg.toLowerCase().includes("erfolg") ? " success" : " error"}`}>{msg}</div>}
             </form>
         <div style={{ marginTop: "1.2rem", textAlign: "center", fontSize: "1rem" }}>
             Noch keinen Account? <br /> <Link style={{ textDecoration: "none", color: "#2E7D67", fontWeight: "bold" }} to="/register">Hier Registrieren</Link>

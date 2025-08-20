@@ -18,7 +18,8 @@ CREATE TABLE IF NOT EXISTS users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     setup_completed ENUM('yes', 'no') DEFAULT 'no',
     is_generating_week BOOLEAN DEFAULT FALSE,
-    is_generating_next_week BOOLEAN DEFAULT FALSE
+    is_generating_next_week BOOLEAN DEFAULT FALSE,
+    reset_code_expiry DATETIME NULL
 );
 
 CREATE TABLE IF NOT EXISTS tasks (
@@ -45,4 +46,12 @@ CREATE TABLE IF NOT EXISTS task_schedule (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE
+);
+
+CREATE TABLE verification_codes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    code VARCHAR(6) NOT NULL,
+    expires_at DATETIME NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

@@ -6,6 +6,7 @@ import userIcon from "../assets/user.svg";
 import passwordIconHidden from "../assets/pw_hidden.svg";
 import passwordIconVisible from "../assets/pw_visible.svg";
 import successIcon from "../assets/successBlack.svg";
+import Navbar from "../components/Navbar";
 
 export default function Register() {
   const [form, setForm] = useState({ username: "", email: "", password: "", confirmPassword: "" });
@@ -94,6 +95,7 @@ export default function Register() {
   return (
     <div className="register-page">
       <div className="register-tile">
+        <Navbar />
         {success ? (
           <div style={{ textAlign: "center", fontSize: "1.8rem", color: "green", padding: "2rem" }}>
             <img src={successIcon} style={{ width: "75px", height: "75px" }} alt="Success Icon" />

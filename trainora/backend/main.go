@@ -101,7 +101,9 @@ func main() {
 	routes.RegisterFeedbackRoutes(api, routes.Db)
 	routes.RegisterSettingsRoutes(api, routes.Db)
 	
-	routes.RegisterMailRoutes(api)
+	routes.RegisterMailRoutes(api, routes.Db)
+	routes.RegisterVerifyCodeRoute(api, routes.Db)
+	routes.RegisterResetPasswordRoute(api, routes.Db)
 
 	// Hilfsrouten
 	api.Get("/check-email", routes.CheckEmail)
