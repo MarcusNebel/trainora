@@ -1,11 +1,15 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import heroVisual from "../../public/App-Icon-Black.svg";
 import "./css/Navbar.css";
 
 const Navbar = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
     <nav className="navbar">
       <div className="navbar-container">
+        {/* Logo + Text */}
         <div className="logo-trainora-text">
           <Link to="/">
             <img src={heroVisual} alt="Trainora Illustration" />
@@ -14,13 +18,24 @@ const Navbar = () => {
             <h1 className="logo" style={{ cursor: "pointer" }}>Trainora</h1>
           </Link>
         </div>
-        <ul className="nav-links">
+
+        {/* Hamburger Menü */}
+        <div 
+          className={`hamburger ${isOpen ? "active" : ""}`} 
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+
+        {/* Links */}
+        <ul className={`nav-links ${isOpen ? "open" : ""}`}>
           <li>
-            <Link to="/register" className="btn btn-register">
+            <Link to="/register" className="btn btn-register" onClick={() => setIsOpen(false)}>
               Jetzt starten
             </Link>
-
-            <Link to="/login" className="btn btn-login">
+            <Link to="/login" className="btn btn-login" onClick={() => setIsOpen(false)}>
               Anmelden
             </Link>
           </li>

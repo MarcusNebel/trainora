@@ -100,6 +100,7 @@ func main() {
 	routes.RegisterPingRoute(api)
 	routes.RegisterFeedbackRoutes(api, routes.Db)
 	routes.RegisterSettingsRoutes(api, routes.Db)
+	routes.RegisterQuickWorkoutRoutes(api)
 	
 	routes.RegisterMailRoutes(api, routes.Db)
 	routes.RegisterVerifyCodeRoute(api, routes.Db)

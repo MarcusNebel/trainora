@@ -55,3 +55,15 @@ CREATE TABLE verification_codes (
     expires_at DATETIME NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE quick_workouts (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,       -- eindeutige ID
+    user_id BIGINT NOT NULL,                    -- wer hat das Workout generiert
+    title VARCHAR(255) NOT NULL,                -- Kurztitel
+    description TEXT NOT NULL,                  -- detaillierte Beschreibung
+    duration INT NOT NULL,                      -- Dauer in Minuten
+    goal VARCHAR(50),                           -- optional: Fokus/Ziel des Workouts
+    equipment VARCHAR(50),                      -- optional: genutztes Equipment
+    status ENUM('generating','done') DEFAULT 'done', -- Status für Ladeanzeige
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP  -- Zeitpunkt der Erstellung
+);

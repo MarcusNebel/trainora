@@ -1,0 +1,249 @@
+/* Quick Page Layout wie Dashboard */
+.quick-page {
+  display: grid;
+  flex: 1;
+  align-items: center;
+  padding: 2rem;
+  padding-top: 3rem; /* Platz für Hamburger auf mobile */
+  transition: margin-left 0.3s ease;
+  background-color: #f7f7f7;
+  min-height: 100vh;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Sidebar Platz auf großen Screens */
+@media (min-width: 769px) {
+  .quick-page {
+    margin-left: 240px; /* Sidebar-Breite */
+    padding-top: 2rem;
+  }
+}
+
+/* Mobile Optimierung */
+@media (max-width: 768px) {
+  .quick-page {
+    padding: 1.5rem 1rem 2rem;
+  }
+}
+
+/* Quick Card – an Dashboard-Karten angelehnt */
+.quick-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
+  padding: 2rem;
+  max-width: 600px;
+  margin: 0 auto;
+  transition: box-shadow 0.3s ease;
+}
+
+.quick-card:hover {
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.15);
+}
+
+/* Header */
+.quick-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.quick-header h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #2E7D67; /* dein Dashboard-Grün */
+  margin-bottom: 0.5rem;
+}
+
+.quick-header p {
+  font-size: 1rem;
+  color: #666;
+}
+
+/* Formular */
+.quick-form {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.quick-input label {
+  display: block;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: #374151;
+}
+
+.quick-input select {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: #fff;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.quick-input select:focus {
+  border-color: #2E7D67;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.25);
+  outline: none;
+}
+
+/* Button */
+.quick-action {
+  margin-top: 2rem;
+}
+
+.quick-action button {
+  width: 100%;
+  padding: 1rem;
+  background: #2E7D67;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.quick-action button:hover {
+  background: #2E7D67;
+}
+
+.quick-action button:active {
+  transform: scale(0.98);
+}
+
+.quick-card-wrapper {
+  position: relative; /* Überlagerung möglich */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 0; /* Abstand entfernen */
+  flex-wrap: nowrap;
+}
+
+.result-card {
+  flex: 1;
+  max-width: 500px;
+}
+
+.loader {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #2563eb;
+}
+
+.exercise-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* Abstand zwischen den Kacheln */
+}
+
+.exercise-card {
+  padding: 1rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  line-height: 1.5;
+}
+
+/* Grid für die Auswahl */
+.option-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+}
+
+.option-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.option-card {
+  flex: 1 1 auto;
+  padding: 0.6rem 1.2rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 9999px; /* pill shape */
+  background: #f9fafb;
+  font-weight: 500;
+  font-size: 1rem;
+  text-align: center;
+  cursor: pointer;
+  color: #111827;
+  transition: all 0.2s ease;
+  min-width: 100px;
+}
+
+.option-card:hover {
+  border-color: #2563eb;
+}
+
+.option-card.active {
+  border-color: #2563eb;
+  background: linear-gradient(to bottom, #eff6ff, #dbeafe);
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.quick-card-wrapper {
+  position: relative; /* Überlagerung möglich */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 0; /* Abstand entfernen */
+  flex-wrap: nowrap;
+}
+
+/* Auswahlkarte */
+.selection-card {
+  transition: transform 0.5s ease;
+  z-index: 2;
+}
+
+/* Auswahlkarte nach links verschieben */
+.selection-card.shift-left {
+  transform: translateX(-50%); /* nur halbe Breite */
+}
+
+/* Ergebnis-Karte */
+.result-card {
+  position: absolute; /* überlagert die Auswahlkarte */
+  top: 0;
+  left: 50%; /* direkt rechts von der Mitte der Auswahlkarte */
+  transform: translateX(50%); /* Startposition außerhalb */
+  opacity: 0;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  z-index: 1;
+  margin-left: 5rem;
+}
+
+/* eingeblendet */
+.result-card.show {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+/* Übungen sanft von oben nach unten einblenden */
+.exercise-card.slide-down,
+p.slide-down {
+  opacity: 0;
+  transform: translateY(-20px);
+  animation: slideDown 0.5s forwards;
+}
+
+@keyframes slideDown {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Loader bleibt mittig */
+.loader {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #2563eb;
+}

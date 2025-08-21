@@ -10,6 +10,7 @@ import Setup from "./components/Setup";
 import ForgotPassword from "./pages/ForgotPassword";
 import EnterCode from "./pages/EnterCode";
 import ResetPassword from "./pages/ResetPassword";
+import QuickWorkoutPage from "./pages/QuickFunction";
 import "./App.css";
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/setup" element={<Setup />} />
+          <Route path="/quick" element={<QuickWorkoutPage />} />
 
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/enter-code" element={<EnterCode />} />

@@ -17,7 +17,9 @@ type WeekPlan = {
   [key: string]: Task[];
 };
 
-const weekdays = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
+const realWeekdays = ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"];
+
+const displayOrder = [1, 2, 3, 4, 5, 6, 0];
 
 const dayPeriodTranslations: Record<string, string> = {
   morning: "Morgens",
@@ -171,20 +173,20 @@ export default function Dashboard() {
 
         <div className="timeline-container">
           <div className="day-circles">
-            {weekdays.map((day, index) => (
+            {displayOrder.map((realIndex) => (
               <div
-                key={index}
-                className={`day-circle ${activeDay === index ? "active" : ""} ${loadingDays[index] ? "loading" : ""}`}
-                onClick={() => setActiveDay(index)}
+                key={realIndex}
+                className={`day-circle ${activeDay === realIndex ? "active" : ""} ${loadingDays[realIndex] ? "loading" : ""}`}
+                onClick={() => setActiveDay(realIndex)}
               >
-                {day}
+                {realWeekdays[realIndex]}
               </div>
             ))}
           </div>
         </div>
 
         <section>
-          <h2>{weekdays[activeDay]} – Tagesplan</h2>
+          <h2>{realWeekdays[activeDay]} – Tagesplan</h2>
           {tasksToday.map((task, i) => (
             <div className="task-card" key={i} onClick={() => setSelectedTask(task)}>
               <div className="task-time">

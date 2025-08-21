@@ -17,14 +17,14 @@
   align-items: center;
 }
 
-.navbar .navbar-container .logo-trainora-text img {
-  max-width: 100%;
-  width: 75px;
+/* Logo */
+.navbar .logo-trainora-text img {
+  width: 65px;
   animation: float 4s ease-in-out infinite;
   cursor: pointer;
 }
 
-.navbar .navbar-container .logo-trainora-text {
+.logo-trainora-text {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -35,6 +35,7 @@
   font-weight: bold;
 }
 
+/* Links Desktop */
 .nav-links {
   display: flex;
   list-style: none;
@@ -49,10 +50,6 @@
 }
 
 .nav-links .btn-register {
-  padding: 0.5rem 1rem;
-}
-
-.nav-links .btn-register {
   padding: 0.75rem 1rem;
   background: #2E7D67;
   color: #fff;
@@ -62,8 +59,8 @@
   margin-right: 15px;
 }
 
-.nav-links .btn-login {
-  padding: 14.4px 16px;
+.nav-links .btn-register:hover {
+  background: #256d58;
 }
 
 .nav-links .btn-login {
@@ -72,5 +69,75 @@
   color: #000;
   border: solid 2px #2E7D67;
   border-radius: 12px;
-  transition: background 0.3s ease;
+  transition: all 0.3s ease;
+}
+
+.nav-links .btn-login:hover {
+  background: #f2f2f2;
+}
+
+/* Hamburger Menü */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  gap: 5px;
+}
+
+.hamburger span {
+  height: 3px;
+  width: 25px;
+  background: #333;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+/* Animation Hamburger */
+.hamburger.active span:nth-child(1) {
+  transform: rotate(45deg) translateY(11px);
+}
+.hamburger.active span:nth-child(2) {
+  opacity: 0;
+}
+.hamburger.active span:nth-child(3) {
+  transform: rotate(-45deg) translateY(-11px);
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+  }
+
+  .nav-links {
+    position: absolute;
+    top: 75px;
+    right: 0;
+    background: white;
+    display: flex;               /* Flex für Zentrierung */
+    flex-direction: column;
+    justify-content: center;     /* <-- vertikal zentriert */
+    align-items: center;         /* horizontal zentriert */
+    width: 100%;
+    overflow: hidden;
+    border-bottom: 1px solid #ddd;
+
+    height: 0;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease-in-out;
+    pointer-events: none;
+  }
+
+  .nav-links.open {
+    height: 4rem;                /* oder größer, je nach Links */
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  .nav-links li {
+    text-align: center;
+    margin: 0.5rem 0;
+  }
 }

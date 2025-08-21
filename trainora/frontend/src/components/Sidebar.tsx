@@ -79,20 +79,11 @@ export default function Sidebar() {
           </li>
           <li>
             <NavLink
-              to="/fitness"
+              to="/quick"
               onClick={() => setOpen(false)}
               className={({ isActive }) => isActive ? "active-link" : ""}
             >
-              Fitness
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/recipes"
-              onClick={() => setOpen(false)}
-              className={({ isActive }) => isActive ? "active-link" : ""}
-            >
-              Rezepte
+              Quick Workout
             </NavLink>
           </li>
         </ul>
