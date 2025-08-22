@@ -131,7 +131,7 @@ export default function QuickWorkoutPage() {
         {/* Ergebnis-Karte */}
         <div className={`quick-card result-card ${isGenerating ? "show" : ""}`}>
           {loading ? (
-            <div className="loader">⏳ Generierung läuft...</div>
+            <div className="spinner"></div> // Spinner anstelle von Text
           ) : result ? (
             <div className="exercise-container">
               <h2>{result.title}</h2>
@@ -160,7 +160,7 @@ export default function QuickWorkoutPage() {
               )}
             </div>
           ) : (
-            <p>Hier erscheint dein Quick Workout.</p>
+            <div className="spinner"></div> // Spinner anstelle von Text
           )}
         </div>
       </div>
