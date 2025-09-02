@@ -1,7 +1,5 @@
-import { useState } from "react";
-import { useEffect } from "react";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import "./css/Login.css";
 import userIcon from "../assets/user.svg";
 import passwordIconHidden from "../assets/pw_hidden.svg";
@@ -10,14 +8,16 @@ import Navbar from "../components/Navbar";
 
 export default function Login() {
   const [form, setForm] = useState({ login: "", password: "" });
+  const [twofaCode, setTwofaCode] = useState("");
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const [rememberMe, setRememberMe] = useState(false);
-  const [cooldown, setCooldown ] = useState(0);
+  const [cooldown, setCooldown] = useState(0);
   const [failedAttempts, setFailedAttempts] = useState(0);
-  
+  const [twofaRequired, setTwofaRequired] = useState(false);
+
   const delays = [3, 5, 10, 30, 60];
 
   useEffect(() => {
@@ -26,23 +26,17 @@ export default function Login() {
       credentials: "include",
     })
       .then((res) => {
-        if (res.ok) {
-          // Wenn Session existiert → Weiterleitung
-          navigate("/dashboard");
-        }
+        if (res.ok) navigate("/dashboard");
       })
-      .catch(() => {
-        // Fehler ignorieren → einfach Login-Seite anzeigen
-      });
+      .catch(() => {});
   }, []);
 
-  const handleChange = e =>
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Wenn noch Cooldown aktiv → abbrechen
     if (cooldown > 0) {
       setMsg(`Bitte warte noch ${cooldown} Sekunden...`);
       return;
@@ -52,7 +46,7 @@ export default function Login() {
     setMsg("");
 
     try {
-      const res = await fetch("/api/login", {
+      const res = await fetch(`/api/login?remember=${rememberMe}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -61,36 +55,57 @@ export default function Login() {
 
       const data = await res.json();
 
-      if (res.ok && data.message?.toLowerCase().includes("erfolg")) {
-        // ✅ Login erfolgreich
-        setFailedAttempts(0);
-        setCooldown(0);
+      if (res.ok && data.twofa_required) {
+        // ✅ Passwort korrekt, 2FA erforderlich
+        setTwofaRequired(true);
+        setMsg("Bitte gib deinen 2FA Code ein.");
+      } else if (res.ok && data.message?.toLowerCase().includes("erfolg")) {
+        // ✅ Login ohne 2FA erfolgreich
         setMsg("Login erfolgreich! Weiterleitung...");
-
-        // Weiterleitung
-        setTimeout(() => {
-          window.location.href = "/dashboard";
-        }, 1500);
+        setTimeout(() => navigate("/dashboard"), 1500);
       } else {
         // ❌ Fehlversuch
         setMsg(data.error || "Login fehlgeschlagen");
-
         setFailedAttempts((prev) => {
           const next = prev + 1;
           const wait = delays[Math.min(next - 1, delays.length - 1)];
-
           setCooldown(wait);
-
-          // Countdown runterzählen
           let t = wait;
           const interval = setInterval(() => {
             t--;
             setCooldown(t);
             if (t <= 0) clearInterval(interval);
           }, 1000);
-
           return next;
         });
+      }
+    } catch {
+      setMsg("Netzwerkfehler");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerify2FA = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMsg("");
+
+    try {
+      const res = await fetch("/api/2fa/verify-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ code: twofaCode }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        setMsg("2FA erfolgreich! Weiterleitung...");
+        setTimeout(() => navigate("/dashboard"), 1500);
+      } else {
+        setMsg(data.error || "Ungültiger 2FA Code");
       }
     } catch {
       setMsg("Netzwerkfehler");
@@ -104,9 +119,14 @@ export default function Login() {
       <div className="login-tile">
         <Navbar />
         <h2>Anmelden</h2>
-        <form onSubmit={handleSubmit} className="login-form">
+
+        {!twofaRequired ? (
+          // -------------------
+          // LOGIN MIT PASSWORT
+          // -------------------
+          <form onSubmit={handleLogin} className="login-form">
             <div className="input-icon-wrapper">
-                <input
+              <input
                 name="login"
                 type="text"
                 placeholder="Benutzername oder E-Mail"
@@ -114,61 +134,167 @@ export default function Login() {
                 onChange={handleChange}
                 required
                 autoFocus
-                />
-                <img src={userIcon} alt="User Icon" className="input-icon" />
+              />
+              <img src={userIcon} alt="User Icon" className="input-icon" />
             </div>
 
             {/* Passwort */}
             <div className="input-icon-wrapper password-with-toggle">
-                <input
+              <input
                 name="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="Passwort"
                 value={form.password}
                 required
                 minLength={6}
-                onChange={(e) => {
-                    const pwd = e.target.value;
-                    setForm({ ...form, password: pwd });
-                    setShowPassword(false);
-                    handleChange(e);
-                }}
-                />
-                <img
+                onChange={handleChange}
+              />
+              <img
                 src={showPassword ? passwordIconVisible : passwordIconHidden}
                 alt="Toggle Password"
                 className="input-icon clickable"
-                onClick={() => setShowPassword(prev => !prev)}
+                onClick={() => setShowPassword((prev) => !prev)}
                 title={showPassword ? "Passwort verbergen" : "Passwort anzeigen"}
-                />
+              />
             </div>
 
-            <div style={{ marginTop: "0.25rem", textAlign: "center", fontSize: "1rem" }}>
-              <Link style={{ textDecoration: "none", color: "#2E7D67", fontWeight: "bold" }} to="/forgot-password">Passwort vergessen?</Link>
+            <div
+              style={{
+                marginTop: "0.25rem",
+                textAlign: "center",
+                fontSize: "1rem",
+              }}
+            >
+              <Link
+                style={{
+                  textDecoration: "none",
+                  color: "#2E7D67",
+                  fontWeight: "bold",
+                }}
+                to="/forgot-password"
+              >
+                Passwort vergessen?
+              </Link>
             </div>
 
             <div className="remember-me">
-                <input
-                    type="checkbox"
-                    id="remember"
-                    checked={rememberMe}
-                    onChange={(e) => setRememberMe(e.target.checked)}
-                    style={{cursor: "pointer"}}
-                />
-                <label style={{cursor: "pointer"}} htmlFor="remember"> Angemeldet bleiben</label>
+              <input
+                type="checkbox"
+                id="remember"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                style={{ cursor: "pointer" }}
+              />
+              <label style={{ cursor: "pointer" }} htmlFor="remember">
+                {" "}
+                Angemeldet bleiben
+              </label>
             </div>
 
-            {/* Button */}
-            <button type="submit" className="btn btn-primary" disabled={loading || cooldown > 0}>
-              {cooldown > 0 ? `Warten (${cooldown}s)` : loading ? "Anmelden..." : "Anmelden"}
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={loading || cooldown > 0}
+            >
+              {cooldown > 0
+                ? `Warten (${cooldown}s)`
+                : loading
+                ? "Anmelden..."
+                : "Anmelden"}
             </button>
 
-            {/* Feedback */}
-            {msg && <div className={`login-msg${msg.toLowerCase().includes("erfolg") ? " success" : " error"}`}>{msg}</div>}
-            </form>
-        <div style={{ marginTop: "1.2rem", textAlign: "center", fontSize: "1rem" }}>
-            Noch keinen Account? <br /> <Link style={{ textDecoration: "none", color: "#2E7D67", fontWeight: "bold" }} to="/register">Hier Registrieren</Link>
-        </div>
+            {msg && (
+              <div
+                className={`login-msg${
+                  msg.toLowerCase().includes("erfolg") ? " success" : " error"
+                }`}
+              >
+                {msg}
+              </div>
+            )}
+          </form>
+        ) : (
+          // -------------------
+          // 2FA CODE EINGABE
+          // -------------------
+          <form onSubmit={handleVerify2FA} className="twofa-form">
+            <div className="twofa-inputs" style={{ display: "flex", gap: "0.5rem", justifyContent: "center" }}>
+              {Array.from({ length: 6 }).map((_, i) => (
+                <input
+                  key={i}
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={1}
+                  value={twofaCode[i] || ""}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/, ""); // nur Zahlen
+                    if (!val && !twofaCode[i]) return; // leer lassen erlaubt
+                    const newCode = twofaCode.split("");
+                    newCode[i] = val;
+                    setTwofaCode(newCode.join(""));
+
+                    // automatisch weiter springen
+                    if (val && i < 5) {
+                      const next = document.getElementById(`twofa-${i + 1}`);
+                      (next as HTMLInputElement)?.focus();
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Backspace" && !twofaCode[i] && i > 0) {
+                      const prev = document.getElementById(`twofa-${i - 1}`);
+                      (prev as HTMLInputElement)?.focus();
+                    }
+                  }}
+                  id={`twofa-${i}`}
+                  style={{
+                    width: "2.5rem",
+                    height: "2.5rem",
+                    textAlign: "center",
+                    fontSize: "1.5rem",
+                  }}
+                  required
+                />
+              ))}
+            </div>
+
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={loading || twofaCode.length < 6}
+              style={{ marginTop: "1rem" }}
+            >
+              {loading ? "Prüfen..." : "Code bestätigen"}
+            </button>
+
+            {msg && (
+              <div
+                className={`login-msg${
+                  msg.toLowerCase().includes("erfolg") ? " success" : " error"
+                }`}
+              >
+                {msg}
+              </div>
+            )}
+          </form>
+        )}
+
+        {!twofaRequired && (
+          <div
+            style={{ marginTop: "1.2rem", textAlign: "center", fontSize: "1rem" }}
+          >
+            Noch keinen Account? <br />{" "}
+            <Link
+              style={{
+                textDecoration: "none",
+                color: "#2E7D67",
+                fontWeight: "bold",
+              }}
+              to="/register"
+            >
+              Hier Registrieren
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );

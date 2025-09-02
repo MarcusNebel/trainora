@@ -59,6 +59,26 @@
   border: 1.5px solid #2E7D67;
 }
 
+.twofa-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+.twofa-form input {
+  padding: 0.3rem 0.25rem;
+  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  font-size: 1rem;
+  outline: none;
+  transition: border 0.2s;
+}
+
+.twofa-form input:focus {
+  border: 1.5px solid #2E7D67;
+}
+
 .input-icon-wrapper {
   position: relative;
   display: flex;

@@ -19,7 +19,10 @@ CREATE TABLE IF NOT EXISTS users (
     setup_completed ENUM('yes', 'no') DEFAULT 'no',
     is_generating_week BOOLEAN DEFAULT FALSE,
     is_generating_next_week BOOLEAN DEFAULT FALSE,
-    reset_code_expiry DATETIME NULL
+    reset_code_expiry DATETIME NULL,
+
+    twofa_enabled BOOLEAN DEFAULT FALSE,
+    twofa_secret VARCHAR(64) DEFAULT NULL
 );
 
 CREATE TABLE IF NOT EXISTS tasks (

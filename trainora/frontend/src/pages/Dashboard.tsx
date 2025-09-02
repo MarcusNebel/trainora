@@ -56,35 +56,34 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    const jsDay = new Date().getDay(); // 0 (So) - 6 (Sa)
-    const mappedDay = (jsDay + 6) % 7; // ergibt 0=Mo, 1=Di, ..., 6=So
-    setActiveDay(mappedDay);
+    const jsDay = new Date().getDay();
+    setActiveDay(jsDay);
   }, []);
 
   useEffect(() => {
-  async function checkAuth() {
-    try {
-      const res = await fetch("/api/me", { credentials: "include" });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.user_id) {
-          if (data.setup_completed !== "yes") {
-            navigate("/setup");
-            return;
+    async function checkAuth() {
+      try {
+        const res = await fetch("/api/me", { credentials: "include" });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.user_id) {
+            if (data.setup_completed !== "yes") {
+              navigate("/setup");
+              return;
+            }
+            setAuthorized(true);
+          } else {
+            navigate("/login");
           }
-          setAuthorized(true);
         } else {
           navigate("/login");
         }
-      } else {
+      } catch {
         navigate("/login");
       }
-    } catch {
-      navigate("/login");
     }
-  }
-  checkAuth();
-}, [navigate]);
+    checkAuth();
+  }, [navigate]);
 
    useEffect(() => {
     if (!authorized) return;

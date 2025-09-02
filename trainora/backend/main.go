@@ -106,6 +106,8 @@ func main() {
 	routes.RegisterVerifyCodeRoute(api, routes.Db)
 	routes.RegisterResetPasswordRoute(api, routes.Db)
 
+	routes.RegisterSetup2FARoutes(api, routes.Db)
+
 	// Hilfsrouten
 	api.Get("/check-email", routes.CheckEmail)
 	api.Get("/check-username", routes.CheckUsername)

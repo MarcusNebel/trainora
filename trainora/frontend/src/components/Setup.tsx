@@ -13,9 +13,16 @@ export default function Setup() {
   const navigate = useNavigate();
   const [authorized, setAuthorized] = useState(false);
   const [generating, setGenerating] = useState(false);
+
+  // Refs für alle Eingaben
   const dayRef = useRef<HTMLInputElement>(null);
   const monthRef = useRef<HTMLInputElement>(null);
   const yearRef = useRef<HTMLInputElement>(null);
+  const heightRef = useRef<HTMLInputElement>(null);
+  const weightRef = useRef<HTMLInputElement>(null);
+  const goalRef = useRef<HTMLInputElement>(null);
+  const allergiesRef = useRef<HTMLInputElement>(null);
+  const activityRef = useRef<HTMLDivElement>(null);
 
   const handleEnter = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") {
@@ -55,6 +62,30 @@ export default function Setup() {
     allergies: "",
   });
   const [errors, setErrors] = useState<string | null>(null);
+
+  // 👉 Fokus setzen wenn Step sich ändert
+  useEffect(() => {
+    switch (step) {
+      case 0:
+        dayRef.current?.focus();
+        break;
+      case 1:
+        heightRef.current?.focus();
+        break;
+      case 2:
+        weightRef.current?.focus();
+        break;
+      case 3:
+        activityRef.current?.focus();
+        break;
+      case 4:
+        goalRef.current?.focus();
+        break;
+      case 5:
+        allergiesRef.current?.focus();
+        break;
+    }
+  }, [step]);
 
   const validateStep = (): boolean => {
     setErrors(null);
@@ -209,7 +240,7 @@ export default function Setup() {
             className="input small"
           />
           <input
-            ref={monthRef}
+            ref={(el) => (monthRef.current = el)}
             inputMode="numeric"
             pattern="[0-9]*"
             placeholder="MM"
@@ -228,7 +259,7 @@ export default function Setup() {
             className="input small"
           />
           <input
-            ref={yearRef}
+            ref={(el) => (yearRef.current = el)}
             inputMode="numeric"
             pattern="[0-9]*"
             placeholder="JJJJ"
@@ -251,6 +282,7 @@ export default function Setup() {
       description: "Wie groß sind Sie (cm)?",
       content: (
         <input
+          ref={heightRef}
           className="input"
           type="number"
           placeholder="z.B. 175"
@@ -266,6 +298,7 @@ export default function Setup() {
       description: "Wie viel wiegen Sie (kg)?",
       content: (
         <input
+          ref={weightRef}
           className="input"
           type="number"
           placeholder="z.B. 70"
@@ -280,7 +313,7 @@ export default function Setup() {
       icon: activityIcon,
       description: "Wie aktiv sind Sie im Alltag?",
       content: (
-        <div className="segmented" onKeyDown={handleEnter} tabIndex={0}>
+        <div ref={activityRef} className="segmented" onKeyDown={handleEnter} tabIndex={0}>
           <button
             className={`seg ${formData.activity_level === "niedrig" ? "active" : ""}`}
             onClick={() => handleChange("activity_level", "niedrig")}
@@ -308,6 +341,7 @@ export default function Setup() {
       description: "Was ist Ihr Ziel?",
       content: (
         <input
+          ref={goalRef}
           className="input"
           type="text"
           placeholder="z.B. fitter werden"
@@ -323,6 +357,7 @@ export default function Setup() {
       description: "Haben Sie Allergien?",
       content: (
         <input
+          ref={allergiesRef}
           className="input"
           type="text"
           placeholder="z.B. Nüsse, Pollen oder 'Keine'"

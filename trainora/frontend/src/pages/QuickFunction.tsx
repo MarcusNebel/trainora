@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./css/QuickFunction.css";
 import Sidebar from "../components/Sidebar";
 
@@ -9,6 +10,8 @@ interface QuickWorkoutResult {
 }
 
 export default function QuickWorkoutPage() {
+  const navigate = useNavigate();
+  const [authorized, setAuthorized] = useState(false);
   const [duration, setDuration] = useState("");
   const [focus, setFocus] = useState("");
   const [equipment, setEquipment] = useState("");
@@ -17,11 +20,38 @@ export default function QuickWorkoutPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showResult, setShowResult] = useState(false);
 
+  // === Login-Check wie im Dashboard ===
+  useEffect(() => {
+    async function checkAuth() {
+      try {
+        const res = await fetch("/api/me", { credentials: "include" });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.user_id) {
+            if (data.setup_completed !== "yes") {
+              navigate("/setup");
+              return;
+            }
+            setAuthorized(true);
+          } else {
+            navigate("/login");
+          }
+        } else {
+          navigate("/login");
+        }
+      } catch {
+        navigate("/login");
+      }
+    }
+    checkAuth();
+  }, [navigate]);
+
   const handleGenerate = async () => {
     if (!duration || !focus || !equipment) return;
-    setIsGenerating(true); // Auswahlelement nach links verschieben
+    setIsGenerating(true);
     setShowResult(false);
     setResult(null);
+    setLoading(true);
 
     try {
       const res = await fetch("/api/quick-workout", {
@@ -37,7 +67,7 @@ export default function QuickWorkoutPage() {
       const data: QuickWorkoutResult = await res.json();
       setResult(data);
 
-      // Nach kurzer Verzögerung zum smoothen Einblenden
+      // Nach kurzer Verzögerung für smoothes Einblenden
       setTimeout(() => setShowResult(true), 300);
     } catch (err) {
       console.error("Fehler bei Quick Workout:", err);
@@ -49,6 +79,9 @@ export default function QuickWorkoutPage() {
   const formatBold = (text: string) => {
     return text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
   };
+
+  // Solange nicht authorisiert, nichts rendern
+  if (!authorized) return null;
 
   return (
     <div className="quick-page">
@@ -131,11 +164,13 @@ export default function QuickWorkoutPage() {
         {/* Ergebnis-Karte */}
         <div className={`quick-card result-card ${isGenerating ? "show" : ""}`}>
           {loading ? (
-            <div className="spinner"></div> // Spinner anstelle von Text
+            <div className="spinner"></div>
           ) : result ? (
             <div className="exercise-container">
               <h2>{result.title}</h2>
-              <p style={{ marginLeft: "1rem" }}><strong>Dauer:</strong> {result.duration} Minuten</p>
+              <p style={{ marginLeft: "1rem" }}>
+                <strong>Dauer:</strong> {result.duration} Minuten
+              </p>
 
               {result.description.match(/\d+\.\s[^\n]+/g) ? (
                 <div className="exercise-grid">
@@ -160,7 +195,7 @@ export default function QuickWorkoutPage() {
               )}
             </div>
           ) : (
-            <div className="spinner"></div> // Spinner anstelle von Text
+            <div className="spinner"></div>
           )}
         </div>
       </div>

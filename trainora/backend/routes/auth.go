@@ -60,11 +60,13 @@ func loginHandler(c *fiber.Ctx) error {
 	var id int
 	var hash string
 	var setupCompleted string
+	var twoFAEnabled bool
 
+	// Prüfen ob Benutzer existiert und Passwort korrekt
 	err := Db.QueryRow(
-		"SELECT id, password_hash, setup_completed FROM users WHERE username = ? OR email = ?",
+		"SELECT id, password_hash, setup_completed, twofa_enabled FROM users WHERE username = ? OR email = ?",
 		input.Login, input.Login,
-	).Scan(&id, &hash, &setupCompleted)
+	).Scan(&id, &hash, &setupCompleted, &twoFAEnabled)
 
 	if err != nil || bcrypt.CompareHashAndPassword([]byte(hash), []byte(input.Password)) != nil {
 		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Benutzername/E-Mail oder Passwort falsch"})
@@ -75,7 +77,24 @@ func loginHandler(c *fiber.Ctx) error {
 		return c.Status(500).JSON(fiber.Map{"error": "Session konnte nicht geladen werden"})
 	}
 
+	// 2FA aktiviert → temporäre Session
+	if twoFAEnabled {
+		sess.Set("pending_user_id", id)
+		sess.Delete("user_id") // sicherstellen, dass man noch nicht "eingeloggt" ist
+		if err := sess.Save(); err != nil {
+			return c.Status(500).JSON(fiber.Map{"error": "Session konnte nicht gespeichert werden"})
+		}
+
+		return c.JSON(fiber.Map{
+			"twofa_required":  true,
+			"user_id":         id,
+			"setup_completed": setupCompleted,
+		})
+	}
+
+	// 2FA nicht aktiviert → direkt einloggen
 	sess.Set("user_id", id)
+	sess.Delete("pending_user_id")
 	if err := sess.Save(); err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "Session konnte nicht gespeichert werden"})
 	}
@@ -90,7 +109,7 @@ func loginHandler(c *fiber.Ctx) error {
 				Name:     "remember_token",
 				Value:    token,
 				HTTPOnly: true,
-				Secure:   false, // Setze auf true bei HTTPS!
+				Secure:   false, // true wenn HTTPS
 				SameSite: "Lax",
 				Path:     "/",
 				MaxAge:   60 * 60 * 24 * 30, // 30 Tage
@@ -98,11 +117,10 @@ func loginHandler(c *fiber.Ctx) error {
 		}
 	}
 
-	// 👇 Hier den setupCompleted-Wert mit zurückgeben
 	return c.JSON(fiber.Map{
 		"message":         "Login erfolgreich",
 		"user_id":         id,
-		"setup_completed": setupCompleted, // <-- wichtig für Frontend
+		"setup_completed": setupCompleted,
 	})
 }
 

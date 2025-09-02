@@ -1,23 +1,114 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useRef } from "react";
 import "./css/Settings.css"; 
 import Sidebar from "../components/Sidebar";
 import clearIcon from "../assets/clear.svg";
 import successIconWhite from "../assets/success.svg";
 import ErrorIconWhite from "../assets/error.svg";
+import FalseIconBlack from "../assets/false-black.svg";
+import TrueIconBlack from "../assets/successBlack.svg";
 
 export default function Settings() {
   const navigate = useNavigate();
+  const inputRef = useRef(null);
   const [authorized, setAuthorized] = useState(false);
   const [toast, setToast] = useState<{ text: string; type: "success" | "error" } | null>(null);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deleteModalShow, setDeleteModalShow] = useState(false); // für Animation
   const [mailData, setMailData] = useState({to: "", subject: "", body: ""});
+  const [enabled, setEnabled] = useState(false);
+
+  const [twoFAModalVisible, setTwoFAModalVisible] = useState(false);
+  const [twoFAQRCode, setTwoFAQRCode] = useState("");
+  const [twoFASecret, setTwoFASecretCode] = useState("");
+  const [twoFACode, setTwoFACode] = useState("");
 
   const showToast = (text: string, type: "success" | "error" = "success") => {
     setToast({ text, type });
     setTimeout(() => setToast(null), 3000); // nach 3s ausblenden
   };
+
+  // ---------- 2FA Funktionen ----------
+  const handle2FASwitch = async (checked: boolean) => {
+    if (checked) {
+      // Setup starten
+      try {
+        const res = await fetch("/api/2fa/setup", { method: "POST", credentials: "include" });
+        if (!res.ok) throw new Error("Fehler beim 2FA-Setup");
+        const data = await res.json();
+        setTwoFAQRCode(data.otpauth_url);
+        setTwoFASecretCode(data.secret);
+        setTwoFAModalVisible(true); // Modal öffnen
+      } catch {
+        showToast("Fehler beim Setup der Zwei-Faktor-Authentifizierung.", "error");
+        setEnabled(false);
+      }
+    } else {
+      // Deaktivieren
+      try {
+        const res = await fetch("/api/2fa/disable", { method: "POST", credentials: "include" });
+        if (!res.ok) throw new Error("Fehler beim Deaktivieren");
+        showToast("2FA erfolgreich deaktiviert.", "success");
+        setEnabled(false);
+      } catch {
+        showToast("Fehler beim Deaktivieren der 2FA.", "error");
+        setEnabled(true);
+      }
+    }
+  };
+
+  const confirm2FA = async () => {
+    try {
+      const res = await fetch("/api/2fa/enable", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: twoFACode }),
+      });
+      if (res.ok) {
+        showToast("2FA erfolgreich aktiviert!", "success");
+        setEnabled(true);
+        setTwoFAModalVisible(false);
+        setTwoFACode("");
+      } else {
+        const err = await res.json();
+        showToast(err.error || "Ungültiger Code.", "error");
+      }
+    } catch {
+      showToast("Netzwerkfehler.", "error");
+    }
+  };
+
+  useEffect(() => {
+    if (twoFAModalVisible && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [twoFAModalVisible]);
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      confirm2FA(); // Deine Funktion zum Aktivieren der 2FA
+    }
+  };
+
+  useEffect(() => {
+    const fetch2FAStatus = async () => {
+      try {
+        const res = await fetch("/api/2fa/status", { credentials: "include" });
+        if (!res.ok) throw new Error("Fehler beim Abrufen des 2FA-Status");
+        const data = await res.json();
+        setEnabled(data.enabled);  // true oder false
+      } catch (err) {
+        console.error(err);
+        showToast("Fehler beim Laden des 2FA-Status.", "error");
+      }
+    };
+
+    if (authorized) {
+      fetch2FAStatus();
+    }
+  }, [authorized]);
 
   const [personalInfo, setPersonalInfo] = useState({
     birthday: { day: "", month: "", year: "" },
@@ -248,6 +339,60 @@ export default function Settings() {
           <input className="smaler-input-box-width" type="password" placeholder="Neues Passwort" value={passwordData.newPassword} onChange={e => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))} />
           <input className="smaler-input-box-width" type="password" placeholder="Passwort bestätigen" value={passwordData.confirmPassword} onChange={e => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))} />
           <button className="save-info-btn" onClick={changePassword}>Passwort ändern</button>
+        </div>
+
+        {/* --- 2FA Einstellungen --- */}
+        <div className="two-fa-settings">
+          <h2>Zwei-Faktor-Authentifizierung</h2>
+
+          <div className="two-fa-switch-container" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <label className="switch">
+              <input
+                type="checkbox"
+                checked={enabled}
+                onChange={e => handle2FASwitch(e.target.checked)}
+              />
+              <span className="slider"></span>
+            </label>
+
+            <span className="two-fa-status" style={{ display: "flex", alignItems: "center", gap: "0.25rem", marginTop: "1rem" }}>
+              <img
+                src={enabled ? TrueIconBlack : FalseIconBlack}
+                alt={enabled ? "2FA aktiviert" : "2FA deaktiviert"}
+                style={{ width: "20px", height: "20px" }}
+              />
+              {enabled ? "2FA ist aktiviert" : "2FA ist deaktiviert"}
+            </span>
+          </div>
+          <p className="warning-text">Aktiviere die Zwei-Faktor-Authentifizierung für zusätzliche Sicherheit.</p>
+
+          {twoFAModalVisible && (
+            <div className="modal-overlay show">
+              <div className="modal show">
+                <h2>2FA einrichten</h2>
+                <p>Scanne den QR-Code mit deiner Authenticator-App und gib den Code ein.</p>
+                <div style={{ textAlign: "center", margin: "1rem 0" }}>
+                  <img src={`https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(twoFAQRCode)}&size=200x200`} alt="QR Code" />
+                </div>
+                {/* Secret Key anzeigen */}
+                {twoFASecret && (
+                  <p>Secret Key: <strong>{twoFASecret}</strong></p>
+                )}
+                <input
+                  ref={inputRef}
+                  type="text"
+                  placeholder="Code aus Authenticator-App"
+                  value={twoFACode}
+                  onChange={e => setTwoFACode(e.target.value)}
+                  onKeyDown={handleKeyDown} // Enter-Taste abfangen
+                />
+                <div className="modal-actions">
+                  <button className="btn cancel" onClick={() => setTwoFAModalVisible(false)}>Abbrechen</button>
+                  <button className="btn save" onClick={confirm2FA}>Aktivieren</button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="personal-information">
