@@ -5,8 +5,8 @@
   width: 240px;
   height: 100vh; /* Fallback */
   height: calc(var(--vh, 1vh) * 100);
-  background: #fff;
-  box-shadow: 2px 0 12px rgba(0,0,0,0.08);
+  background: var(--white);
+  box-shadow: var(--card-shadow-md);
   border-radius: 0 15px 15px 0;
   padding: 2rem 1rem;
   display: flex;
@@ -35,13 +35,13 @@
   text-decoration: none;
   font-size: 1.3rem;
   font-weight: 600;
-  color: #424242;
+  color: var(--gray);
   transition: all 0.2s;
 }
 
 .sidebar-links li a:hover {
-  color: #fff;
-  background: #2E7D67;
+  color: var(--white);
+  background: var(--green);
 }
 
 .sidebar-hamburger {
@@ -64,7 +64,7 @@
   display: block;
   height: 4px;
   width: 100%;
-  background: #2E7D67;
+  background: var(--green);
   border-radius: 2px;
   transition: 0.3s;
 }
@@ -112,7 +112,7 @@
   font-size: 2rem;
   font-weight: bold;
   margin-bottom: 2.5rem;
-  color: #2E7D67;
+  color: var(--green);
   letter-spacing: 1px;
   text-align: left;
   padding-left: 0.2em;
@@ -122,7 +122,7 @@
   margin-top: auto;
   padding: 1.5rem 0 0.5rem 0.2em;
   font-size: 0.95rem;
-  color: #2E7D67;
+  color: var(--green);
   text-align: left;
   display: flex;
   flex-direction: column;
@@ -130,7 +130,7 @@
 }
 
 .sidebar-foot a {
-  color: #424242;
+  color: var(--gray);
   text-decoration: none;
   font-weight: 600;
 }
@@ -153,23 +153,23 @@
 .sidebar-foot button {
   padding: 0.6rem 1.4rem;
   font-size: 1rem;
-  background-color: #2E7D67;
-  color: white;
+  background-color: var(--green);
+  color: var(--white);
   border: none;
   border-radius: 12px;
   cursor: pointer;
 }
 
 .sidebar-links a.active-link {
-  color: #fff;
-  background: #2E7D67;
+  color: var(--white);
+  background: var(--green);
 }
 .sidebar-foot a.active-link {
   padding: 10px 15px;
   border-radius: 12px;
   text-decoration: none;
-  color: #fff;
-  background: #2E7D67;
+  color: var(--white);
+  background: var(--green);
 }
 
 .sidebar-logo {

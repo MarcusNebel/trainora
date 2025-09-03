@@ -6,7 +6,7 @@
   padding: 2rem;
   padding-top: 3rem; /* Platz für Hamburger auf mobile */
   transition: margin-left 0.3s ease;
-  background-color: #f7f7f7;
+  background-color: var(--bg);
   min-height: 100vh;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
@@ -28,9 +28,9 @@
 
 /* --- Quick Card – an Dashboard-Karten angelehnt --- */
 .quick-card {
-  background: #fff;
+  background: var(--white);
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
+  box-shadow: var(--card-shadow-md);
   padding: 2rem;
   max-width: 600px;
   margin: 0 auto;
@@ -38,7 +38,7 @@
 }
 
 .quick-card:hover {
-  box-shadow: 0 6px 18px rgb(0 0 0 / 0.15);
+  box-shadow: var(--card-shadow-lg);
 }
 
 /* --- Header --- */
@@ -50,13 +50,13 @@
 .quick-header h1 {
   font-size: 1.8rem;
   font-weight: 700;
-  color: #2E7D67;
+  color: var(--green);
   margin-bottom: 0.5rem;
 }
 
 .quick-header p {
   font-size: 1rem;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 /* --- Formular --- */
@@ -70,21 +70,21 @@
   font-weight: 600;
   font-size: 1rem;
   margin-bottom: 0.5rem;
-  color: #374151;
+  color: var(--input-label);
 }
 
 .quick-input select {
   width: 100%;
   padding: 0.8rem 1rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--input-border);
   border-radius: 8px;
   font-size: 1rem;
-  background: #fff;
+  background: var(--white);
   transition: border 0.2s ease, box-shadow 0.2s ease;
 }
 
 .quick-input select:focus {
-  border-color: #2E7D67;
+  border-color: var(--green);
   box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.25);
   outline: none;
 }
@@ -97,8 +97,8 @@
 .quick-action button {
   width: 100%;
   padding: 1rem;
-  background: #2E7D67;
-  color: #fff;
+  background: var(--green);
+  color: var(--white);
   font-size: 1.1rem;
   font-weight: 600;
   border: none;
@@ -108,7 +108,7 @@
 }
 
 .quick-action button:hover {
-  background: #2E7D67;
+  background: var(--green);
 }
 
 .quick-action button:active {
@@ -192,9 +192,9 @@
 
 .exercise-card {
   padding: 1rem;
-  background: #fff;
+  background: var(--white);
   border-radius: 12px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: var(--card-shadow-md);
   line-height: 1.5;
 }
 
@@ -208,26 +208,26 @@
 .option-card {
   flex: 1 1 auto;
   padding: 0.6rem 1.2rem;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--option-border);
   border-radius: 9999px;
-  background: #f9fafb;
+  background: var(--option-background);
   font-weight: 500;
   font-size: 1rem;
   text-align: center;
   cursor: pointer;
-  color: #111827;
+  color: var(--midnight-blue);
   transition: all 0.2s ease;
   min-width: 100px;
 }
 
 .option-card:hover {
-  border-color: #2563eb;
+  border-color: var(--blue);
 }
 
 .option-card.active {
-  border-color: #2563eb;
-  background: linear-gradient(to bottom, #eff6ff, #dbeafe);
-  color: #2563eb;
+  border-color: var(--blue);
+  background: linear-gradient(to bottom, var(--superlight-blue), var(--light-blue));
+  color: var(--blue);
   font-weight: 600;
 }
 
@@ -250,13 +250,13 @@ p.slide-down {
 .loader {
   text-align: center;
   font-size: 1.2rem;
-  color: #2563eb;
+  color: var(--blue);
 }
 
 /* --- Spinner --- */
 .spinner {
-  border: 6px solid #f3f3f3;
-  border-top: 6px solid #2E7D67;
+  border: 6px solid var(--darker-white);
+  border-top: 6px solid var(--green);
   border-radius: 50%;
   width: 50px;
   height: 50px;

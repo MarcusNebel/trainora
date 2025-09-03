@@ -1,17 +1,17 @@
 .home-page {
   font-family: 'Nunito', Arial, sans-serif;
-  color: #2E7D67;
+  color: var(--green);
 }
 
 .home-page h1,
 .home-page h2,
 .home-page h3 {
   font-weight: 700;
-  color: #111827;
+  color: var(--midnight-blue);
 }
 
 .home-page p {
-  color: #4b5563;
+  color: var(--grayish);
 }
 
 /* === Hero-Section === */
@@ -20,7 +20,7 @@
   align-items: center;
   justify-content: center;
   padding: 5rem 2rem;
-  background: #f7f7f7;
+  background: var(--bg);
   margin-top: 4.75rem;
   margin-bottom: 0;
 }
@@ -48,16 +48,16 @@
   margin: 5rem auto;
   margin-top: 0rem;
   padding: 3rem;
-  background: #fff;
+  background: var(--white);
   border-radius: 1.5rem;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  box-shadow: var(--card-shadow-md);
   text-align: center;
 }
 
 .home-page .about-trainora h2 {
   margin-bottom: 1.5rem;
   font-size: 2rem;
-  color: #1f2937;
+  color: var(--dark-blue);
 }
 
 .home-page .about-trainora p {
@@ -74,7 +74,7 @@
   text-align: center;
   margin-bottom: 3rem;
   font-size: 2rem;
-  color: #111827;
+  color: var(--midnight-blue);
 }
 
 .home-page .features-grid {
@@ -84,17 +84,17 @@
 }
 
 .home-page .feature-tile {
-  background: #fff;
+  background: var(--white);
   padding: 2rem;
   border-radius: 1.5rem;
   text-align: center;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  box-shadow: var(--card-shadow-md);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .home-page .feature-tile:hover {
   transform: translateY(-6px);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+  box-shadow: var(--card-shadow-lg);
 }
 
 .home-page .feature-icon-img {
@@ -105,7 +105,7 @@
 .home-page .feature-tile h3 {
   font-size: 1.25rem;
   margin-bottom: 0.75rem;
-  color: #1f2937;
+  color: var(--dark-blue);
 }
 
 /* === Responsive === */

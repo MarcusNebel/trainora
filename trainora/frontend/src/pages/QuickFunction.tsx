@@ -168,7 +168,7 @@ export default function QuickWorkoutPage() {
           ) : result ? (
             <div className="exercise-container">
               <h2>{result.title}</h2>
-              <p style={{ marginLeft: "1rem" }}>
+              <p style={{ marginLeft: "1rem", marginBottom: "1rem" }}>
                 <strong>Dauer:</strong> {result.duration} Minuten
               </p>
 

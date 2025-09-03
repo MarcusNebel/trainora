@@ -4,7 +4,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f3f6f4;
+  background: var(--bg);
 }
 
 .login-msg {
@@ -14,17 +14,17 @@
 }
 
 .login-msg.success {
-  color: #2E7D67;
+  color: var(--green);
 }
 
 .login-msg.error {
-  color: #d32f2f;
+  color: var(--error-red);
 }
 
 .login-tile {
-  background: #fff;
+  background: var(--white);
   border-radius: 18px;
-  box-shadow: 0 4px 24px rgba(44, 62, 80, 0.09);
+  box-shadow: var(--card-shadow-md);
   padding: 2.5rem 2rem 2rem 2rem;
   max-width: 340px;
   width: 100%;
@@ -35,7 +35,7 @@
 
 .login-tile h2 {
   margin-bottom: 1.4rem;
-  color: #2E7D67;
+  color: var(--green);
   font-size: 1.5rem;
 }
 
@@ -49,14 +49,14 @@
 .login-form input {
   padding: 0.9rem 1rem;
   border-radius: 10px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--modal-cancel-btn);
   font-size: 1rem;
   outline: none;
   transition: border 0.2s;
 }
 
 .login-form input:focus {
-  border: 1.5px solid #2E7D67;
+  border: 1.5px solid var(--green);
 }
 
 .twofa-form {
@@ -69,14 +69,14 @@
 .twofa-form input {
   padding: 0.3rem 0.25rem;
   border-radius: 10px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--modal-cancel-btn);
   font-size: 1rem;
   outline: none;
   transition: border 0.2s;
 }
 
 .twofa-form input:focus {
-  border: 1.5px solid #2E7D67;
+  border: 1.5px solid var(--green);
 }
 
 .input-icon-wrapper {

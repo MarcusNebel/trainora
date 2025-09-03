@@ -6,12 +6,183 @@
   font-family: 'Fira Sans', sans-serif;
 }
 
+/* Nutze die Variablen für Hintergrund und Textfarbe */
 body {
-  background: #f7f7f7;
-  color: #424242;
+  background: var(--bg);
+  color: var(--gray);
 }
 
 .App {
   font-family: sans-serif;
   padding: 2rem;
+}
+
+:root {
+  --white: #fff;
+  --darker-white: #f3f3f3;
+  --bg: #f7f7f7;
+  --light-bg: #f3f6f4;
+  --app-layout: #f9f9f9;
+  --dark-gray: #333;
+  --middle-gray: #444;
+  --gray: #555;
+  --text-secondary: #666;
+  --light-grayish: #999;
+  --grayish: #4b5563;
+  --input-label: #374151;
+  --light-gray: #ccc;
+  --superlight-gray: #eee;
+  --other-gray: #ddd;
+  --modal-cancel-btn: #e0e0e0;
+  --modal-cancel-btn-hover: #d5d5d5;
+  --option-border: #e5e7eb;
+  --option-background: #f9fafb;
+  --input-border: #d1d5db;
+  --black: #000;
+  --midnight-blue: #111827;
+  --dark-blue: #1f2937;
+  --blue: #2563eb;
+  --normal-blue: #3498db;
+  --light-blue: #dbeafe;
+  --superlight-blue: #eff6ff;
+  --red: #ff1a1a;
+  --toast-red: #f44336;
+  --dark-red: #e74c3c;
+  --error-red: #d32f2f;
+  --orange: #e67e22;
+  --dark-green: #25614f;
+  --dark-green-hover: #246552;
+  --green: #2E7D67;
+  --toast-green: #4caf50;
+  --middle-green: #2e7d32;
+  --dark-mint-green: #2ecc71;
+  --mint-green: #a5d6b7;
+  --light-mint-green: #d5ffd7;
+  --card-shadow: 0 12px 30px rgba(16,24,40,0.12);
+  --filled-bg: rgba(16,24,40,0.04);
+  
+  --card-shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.1);
+  --card-shadow-sm-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --card-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --card-shadow-lg: 0 12px 30px rgba(0, 0, 0, 0.18);
+
+  --scrollbar-track: var(--light-bg);
+  --scrollbar-thumb: var(--grayish);
+  --scrollbar-thumb-hover: var(--dark-gray);
+}
+
+/* DARK THEME */
+[data-theme="dark"] {
+  --white: #181a1b; /* Hintergrundbasis */
+  --darker-white: #212325;
+  --bg: #181a1b;
+  --light-bg: #202225;
+  --app-layout: #202225;
+
+  /* Textfarben */
+  --dark-gray: #e5e7eb;       /* Primärer Text */
+  --middle-gray: #d1d5db;     /* Normaler Text */
+  --gray: #cbd5e1;            /* Standard */
+  --text-secondary: #9ca3af;  /* Sekundär */
+  --light-grayish: #6b7280;   /* Deaktiviert */
+  --grayish: #cbd5e1;
+  --input-label: #e5e7eb;
+
+  /* Flächen + Ränder */
+  --light-gray: #2a2d30;
+  --superlight-gray: #222426;
+  --other-gray: #2f3133;
+  --modal-cancel-btn: #2f3133;
+  --modal-cancel-btn-hover: #3a3d40;
+  --option-border: #3a3d40;
+  --option-background: #1f2123;
+  --input-border: #4b5563;
+
+  /* Kontrastfarbe Schwarz/Weiß */
+  --black: #fafafa;
+
+  /* Blau-Töne */
+  --midnight-blue: #0a101a;
+  --dark-blue: #111827;
+  --blue: #3b82f6;            /* Akzent */
+  --normal-blue: #60a5fa;
+  --light-blue: #1e3a8a;
+  --superlight-blue: #1e293b;
+
+  /* Rot-Töne */
+  --red: #ef4444;
+  --toast-red: #f87171;
+  --dark-red: #b91c1c;
+  --error-red: #dc2626;
+
+  /* Orange */
+  --orange: #f59e0b;
+
+  /* Grün-Töne */
+  --dark-green: #166534;
+  --dark-green-hover: #15803d;
+  --green: #22c55e;
+  --toast-green: #4ade80;
+  --middle-green: #16a34a;
+  --dark-mint-green: #10b981;
+  --mint-green: #6ee7b7;
+  --light-mint-green: #064e3b;
+
+  /* Schatten + Flächenfüllung */
+  --card-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+  --filled-bg: rgba(255, 255, 255, 0.04);
+
+  --card-shadow-sm: 0 2px 6px rgba(255, 255, 255, 0.05);
+  --card-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6), 0 2px 6px rgba(255, 255, 255, 0.05);
+  --card-shadow-lg: 0 12px 30px rgba(0, 0, 0, 0.7), 0 4px 12px rgba(255, 255, 255, 0.06);
+
+  --scrollbar-track: var(--bg);
+  --scrollbar-thumb: #444;
+  --scrollbar-thumb-hover: #666;
+
+  .option-card, .day-circle {
+    color: var(--gray);
+  }
+  .day-circle.active {
+    color: var(--white);
+  }
+  input, select {
+    background: var(--filled-bg);
+    border: 1px solid var(--input-border);
+    color: var(--input-label);
+  }
+  .option-card.active {
+    background: linear-gradient(to bottom, var(--superlight-blue), var(--dark-blue));
+  }
+  .close-button {
+    color: var(--light-grayish);
+  }
+  .hero-content h1, .features h2, .about-trainora .about-content h2, .logo-trainora-text h1 {
+    color: var(--dark-gray);
+  }
+}
+
+/* Einheitliches Styling */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: 6px;
+  border: 2px solid var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }

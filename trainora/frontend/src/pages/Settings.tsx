@@ -8,6 +8,7 @@ import successIconWhite from "../assets/success.svg";
 import ErrorIconWhite from "../assets/error.svg";
 import FalseIconBlack from "../assets/false-black.svg";
 import TrueIconBlack from "../assets/successBlack.svg";
+import DarkModeToggle from "../components/DarkModeToggle";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -16,7 +17,6 @@ export default function Settings() {
   const [toast, setToast] = useState<{ text: string; type: "success" | "error" } | null>(null);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deleteModalShow, setDeleteModalShow] = useState(false); // für Animation
-  const [mailData, setMailData] = useState({to: "", subject: "", body: ""});
   const [enabled, setEnabled] = useState(false);
 
   const [twoFAModalVisible, setTwoFAModalVisible] = useState(false);
@@ -126,32 +126,6 @@ export default function Settings() {
     newPassword: "",
     confirmPassword: "",
   });
-
-  async function sendEmail() {
-    if (!mailData.to || !mailData.subject || !mailData.body) {
-      showToast("Bitte alle Felder ausfüllen.", "error");
-      return;
-    }
-
-    try {
-      const res = await fetch("/api/sendmail", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(mailData)
-      });
-
-      if (res.ok) {
-        showToast("E-Mail erfolgreich gesendet!", "success");
-        setMailData({ to: "", subject: "", body: "" });
-      } else {
-        const err = await res.json();
-        showToast(err.error || "Fehler beim Senden der E-Mail.", "error");
-      }
-    } catch {
-      showToast("Netzwerkfehler beim Senden der E-Mail.", "error");
-    }
-  }
 
   // Lädt initial die Daten
   useEffect(() => {
@@ -472,6 +446,12 @@ export default function Settings() {
           <button className="save-info-btn" onClick={savePersonalInfo}>Speichern</button>
         </div>
 
+        <div className="design-settings">
+          <h2>Design-Einstellungen</h2>
+
+          <DarkModeToggle />
+        </div>
+
         <div className="delete-account">
           <h2 className="delete-account-header">Konto löschen</h2>
           <button className="delete-account-button" onClick={() => {setDeleteModalVisible(true); setTimeout(() => setDeleteModalShow(true), 10);}}>Konto löschen</button>
@@ -479,32 +459,6 @@ export default function Settings() {
             Lösche dein Trainora Konto, inklusive aller persönlichen Daten und Inhalte.
             Das Konto wird sofort gelöscht. Eine Löschung Ihres Kontos ist nicht rückgängig zu machen.
           </p>
-        </div>
-
-        <div className="send-mail-section">
-          <h2>E-Mail senden</h2>
-          <input
-            type="email"
-            className="smaler-input-box-width"
-            placeholder="Empfänger"
-            value={mailData.to}
-            onChange={e => setMailData(prev => ({ ...prev, to: e.target.value }))}
-          />
-          <input
-            type="text"
-            className="smaler-input-box-width"
-            placeholder="Betreff"
-            value={mailData.subject}
-            onChange={e => setMailData(prev => ({ ...prev, subject: e.target.value }))}
-          />
-          <textarea
-            className="smaler-input-box-width"
-            placeholder="Nachricht"
-            value={mailData.body}
-            onChange={e => setMailData(prev => ({ ...prev, body: e.target.value }))}
-            rows={4}
-          />
-          <button className="save-info-btn" onClick={sendEmail}>E-Mail senden</button>
         </div>
       </div>
 

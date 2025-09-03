@@ -5,8 +5,8 @@
   top: 0;
   width: 100%;
   min-height: 75px;
-  background: white;
-  border-bottom: 1px solid #ddd;
+  background: var(--white);
+  border-bottom: 1px solid var(--superlight-gray);
   z-index: 1000;
   padding: 0.75rem 2rem;
 }
@@ -46,34 +46,34 @@
 
 .nav-links a {
   text-decoration: none;
-  color: #333;
+  color: var(--dark-gray);
 }
 
 .nav-links .btn-register {
   padding: 0.75rem 1rem;
-  background: #2E7D67;
-  color: #fff;
-  border: solid 2px #2E7D67;
+  background: var(--green);
+  color: var(--white);
+  border: solid 2px var(--green);
   border-radius: 12px;
   transition: background 0.3s ease;
   margin-right: 15px;
 }
 
 .nav-links .btn-register:hover {
-  background: #256d58;
+  background: var(--dark-green-hover);
 }
 
 .nav-links .btn-login {
   padding: 0.75rem 1rem;
-  background: #fff;
-  color: #000;
-  border: solid 2px #2E7D67;
+  background: var(--white);
+  color: var(--black);
+  border: solid 2px var(--green);
   border-radius: 12px;
   transition: all 0.3s ease;
 }
 
 .nav-links .btn-login:hover {
-  background: #f2f2f2;
+  background: var(--darker-white);
 }
 
 /* Hamburger Menü */
@@ -87,7 +87,7 @@
 .hamburger span {
   height: 3px;
   width: 25px;
-  background: #333;
+  background: var(--dark-gray);
   border-radius: 2px;
   transition: all 0.3s ease;
 }
@@ -113,14 +113,14 @@
     position: absolute;
     top: 75px;
     right: 0;
-    background: white;
+    background: var(--white);
     display: flex;               /* Flex für Zentrierung */
     flex-direction: column;
     justify-content: center;     /* <-- vertikal zentriert */
     align-items: center;         /* horizontal zentriert */
     width: 100%;
     overflow: hidden;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid var(--other-gray);
 
     height: 0;
     opacity: 0;
