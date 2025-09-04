@@ -1,11 +1,18 @@
 import "./css/Home.css";
-import featureRecipe from "../assets/feature-recipe.svg";
-import featureWorkout from "../assets/feature-workout.svg";
-import featureAi from "../assets/feature-ai.svg";
-import featurePrivacy from "../assets/feature-privacy.svg";
+import featureWorkoutBlack from "../assets/feature-workout-Black.svg";
+import featureWorkoutWhite from "../assets/feature-workout-White.svg";
+import featureAiBlack from "../assets/feature-ai-Black.svg";
+import featureAiWhite from "../assets/feature-ai-White.svg";
+import featurePrivacyBlack from "../assets/feature-privacy-Black.svg";
+import featurePrivacyWhite from "../assets/feature-privacy-White.svg";
 import Navbar from "../components/Navbar";
+import { getCurrentTheme } from "../components/themeUtils";
 
 export default function Home() {
+  const featureWorkout = getCurrentTheme() === "dark" ? featureWorkoutWhite : featureWorkoutBlack;
+  const featureAi = getCurrentTheme() === "dark" ? featureAiWhite : featureAiBlack;
+  const featurePrivacy = getCurrentTheme() === "dark" ? featurePrivacyWhite : featurePrivacyBlack;
+
   return (
     <div className="home-page">
       <Navbar />
@@ -44,14 +51,6 @@ export default function Home() {
             <p>
               Erhalte Workouts, die zu deinem Fitnesslevel passen – egal ob Anfänger oder Fortgeschritten.
               Effektive Übungen für zuhause oder das Studio, angepasst an deine Ziele.
-            </p>
-          </div>
-          <div className="feature-tile">
-            <img src={featureRecipe} alt="Individuelle Rezepte" className="feature-icon-img" />
-            <h3>Individuelle Rezepte</h3>
-            <p>
-              Leckere, gesunde Mahlzeiten, die deine Trainingsfortschritte unterstützen.
-              Schnell zubereitet, eiweißreich und genau auf deine Bedürfnisse abgestimmt.
             </p>
           </div>
           <div className="feature-tile">

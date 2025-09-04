@@ -1,10 +1,18 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./css/Login.css";
-import userIcon from "../assets/user.svg";
-import passwordIconHidden from "../assets/pw_hidden.svg";
-import passwordIconVisible from "../assets/pw_visible.svg";
+import userIconBlack from "../assets/userBlack.svg";
+import userIconWhite from "../assets/userWhite.svg";
+import passwordIconHiddenBlack from "../assets/pw_hiddenBlack.svg";
+import passwordIconHiddenWhite from "../assets/pw_hiddenWhite.svg";
+import passwordIconVisibleBlack from "../assets/pw_visibleBlack.svg";
+import passwordIconVisibleWhite from "../assets/pw_visibleWhite.svg";
 import Navbar from "../components/Navbar";
+import { getCurrentTheme } from "../components/themeUtils";
+
+const userIcon = getCurrentTheme() === "dark" ? userIconWhite : userIconBlack;
+const passwordIconHidden = getCurrentTheme() === "dark" ? passwordIconHiddenWhite : passwordIconHiddenBlack;
+const passwordIconVisible = getCurrentTheme() === "dark" ? passwordIconVisibleWhite : passwordIconVisibleBlack;
 
 export default function Login() {
   const [form, setForm] = useState({ login: "", password: "" });

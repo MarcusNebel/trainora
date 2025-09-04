@@ -2,7 +2,11 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import "./css/ForgotPassword.css";
 import Navbar from "../components/Navbar";
-import userIcon from "../assets/user.svg";
+import userIconBlack from "../assets/userBlack.svg";
+import userIconWhite from "../assets/userWhite.svg";
+import { getCurrentTheme } from "../components/themeUtils";
+
+const userIcon = getCurrentTheme() === "dark" ? userIconWhite : userIconBlack;
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");

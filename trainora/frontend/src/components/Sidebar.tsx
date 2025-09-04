@@ -1,10 +1,15 @@
 import { useState } from "react";
 import { useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import settingsIcon from "../assets/settings.svg";
+import logoBlack from "../../public/App-Icon-Black.svg";
+import logoWhite from "../../public/App-Icon-White.svg";
+import settingsIconBlack from "../assets/settings.svg";
+import settingsIconWhite from "../assets/settingsWhite.svg";
 import exitIcon from "../assets/exit.svg";
-import logo from "../../public/App-Icon-Black.svg";
 import "./css/Sidebar.css";
+import { getCurrentTheme } from "./themeUtils";
+
+const settingsIcon = getCurrentTheme() === "dark" ? settingsIconWhite : settingsIconBlack;
 
 export default function Sidebar() {
   const navigate = useNavigate();
@@ -63,7 +68,7 @@ export default function Sidebar() {
       <nav className={`sidebar${open ? " open" : ""}`}>
         <div className="sidebar-head">
           <NavLink to="/dashboard" style={{textDecoration: "none", color: "#2E7D67"}} onClick={() => setOpen(false)}>
-            <img src={logo} alt="HealthPilot Logo" className="sidebar-logo" />
+            <img src={getCurrentTheme() === "dark" ? logoWhite : logoBlack} alt="HealthPilot Logo" className="sidebar-logo" />
           </NavLink>
         </div>
 

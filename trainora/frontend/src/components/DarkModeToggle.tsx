@@ -1,29 +1,55 @@
 import React from "react";
 import { useThemeContext } from "../components/ThemeProvider";
+import "./css/DarkModeToggle.css"
 
 export default function DarkModeToggle() {
   const { theme, setTheme } = useThemeContext();
 
   return (
-    <div style={{ display: "flex", gap: "0.5rem" }}>
-      <button
-        onClick={() => setTheme("light")}
-        style={{ fontWeight: theme === "light" ? "bold" : "normal" }}
-      >
-        ☀️ Hell
-      </button>
-      <button
-        onClick={() => setTheme("dark")}
-        style={{ fontWeight: theme === "dark" ? "bold" : "normal" }}
-      >
-        🌙 Dunkel
-      </button>
-      <button
-        onClick={() => setTheme("system")}
-        style={{ fontWeight: theme === "system" ? "bold" : "normal" }}
-      >
-        💻 System
-      </button>
-    </div>
+    <fieldset
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "0.75rem",
+        border: "none",
+        padding: 0,
+        margin: 0,
+      }}
+    >
+      <legend style={{ fontWeight: "bold", marginBottom: "0.75rem" }}>Theme wählen:</legend>
+
+      <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        <input
+          type="radio"
+          name="theme"
+          value="light"
+          checked={theme === "light"}
+          onChange={() => setTheme("light")}
+        />
+        Hell
+      </label>
+
+      <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        <input
+          type="radio"
+          name="theme"
+          value="dark"
+          checked={theme === "dark"}
+          onChange={() => setTheme("dark")}
+        />
+        Dunkel
+      </label>
+
+      <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        <input
+          type="radio"
+          name="theme"
+          value="system"
+          checked={theme === "system"}
+          onChange={() => setTheme("system")}
+        />
+        System (Standard)
+      </label>
+    </fieldset>
   );
 }

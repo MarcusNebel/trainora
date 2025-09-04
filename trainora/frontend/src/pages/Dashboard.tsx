@@ -2,8 +2,14 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 import "./css/Dashboard.css";
-import successIconWhite from "../assets/success.svg";
-import ErrorIconWhite from "../assets/error.svg";
+import successIconWhite from "../assets/successWhite.svg";
+import successIconBlack from "../assets/successBlack.svg";
+import ErrorIconWhite from "../assets/errorWhite.svg";
+import ErrorIconBlack from "../assets/errorBlack.svg";
+import { getCurrentTheme } from "../components/themeUtils";
+
+const ErrorIcon = getCurrentTheme() === "dark" ? ErrorIconBlack : ErrorIconWhite;
+const successIcon = getCurrentTheme() === "dark" ? successIconBlack : successIconWhite;
 
 interface Task {
   id?: number;
@@ -240,7 +246,7 @@ export default function Dashboard() {
           >
             {feedbackMessage.text}
             <img
-              src={feedbackMessage.type === "success" ? successIconWhite : ErrorIconWhite}
+              src={feedbackMessage.type === "success" ? successIcon : ErrorIcon}
               style={{ width: "20px", height: "20px", marginLeft: "8px" }}
               alt={feedbackMessage.type === "success" ? "Success Icon" : "Error Icon"}
             />

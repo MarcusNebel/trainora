@@ -2,8 +2,14 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import "./css/ResetPassword.css";
-import passwordIconHidden from "../assets/pw_hidden.svg";
-import passwordIconVisible from "../assets/pw_visible.svg";
+import passwordIconHiddenBlack from "../assets/pw_hiddenBlack.svg";
+import passwordIconHiddenWhite from "../assets/pw_hiddenWhite.svg";
+import passwordIconVisibleBlack from "../assets/pw_visibleBlack.svg";
+import passwordIconVisibleWhite from "../assets/pw_visibleWhite.svg";
+import { getCurrentTheme } from "../components/themeUtils";
+
+const passwordIconHidden = getCurrentTheme() === "dark" ? passwordIconHiddenWhite : passwordIconHiddenBlack;
+const passwordIconVisible = getCurrentTheme() === "dark" ? passwordIconVisibleWhite : passwordIconVisibleBlack;
 
 export default function ResetPassword() {
   const navigate = useNavigate();

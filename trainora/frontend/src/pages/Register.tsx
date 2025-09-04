@@ -1,12 +1,24 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./css/Register.css";
-import mailIcon from "../assets/mail.svg";
-import userIcon from "../assets/user.svg";
-import passwordIconHidden from "../assets/pw_hidden.svg";
-import passwordIconVisible from "../assets/pw_visible.svg";
-import successIcon from "../assets/successBlack.svg";
+import mailIconBlack from "../assets/mailBlack.svg";
+import mailIconWhite from "../assets/mailWhite.svg";
+import userIconBlack from "../assets/userBlack.svg";
+import userIconWhite from "../assets/userWhite.svg";
+import passwordIconHiddenBlack from "../assets/pw_hiddenBlack.svg";
+import passwordIconHiddenWhite from "../assets/pw_hiddenWhite.svg";
+import passwordIconVisibleBlack from "../assets/pw_visibleBlack.svg";
+import passwordIconVisibleWhite from "../assets/pw_visibleWhite.svg";
+import successIconBlack from "../assets/successBlack.svg";
+import successIconWhite from "../assets/successWhite.svg";
 import Navbar from "../components/Navbar";
+import { getCurrentTheme } from "../components/themeUtils";
+
+const mailIcon = getCurrentTheme() === "dark" ? mailIconWhite : mailIconBlack;
+const userIcon = getCurrentTheme() === "dark" ? userIconWhite : userIconBlack;
+const passwordIconHidden = getCurrentTheme() === "dark" ? passwordIconHiddenWhite : passwordIconHiddenBlack;
+const passwordIconVisible = getCurrentTheme() === "dark" ? passwordIconVisibleWhite : passwordIconVisibleBlack;
+const successIcon = getCurrentTheme() === "dark" ? successIconWhite : successIconBlack;
 
 export default function Register() {
   const [form, setForm] = useState({ username: "", email: "", password: "", confirmPassword: "" });

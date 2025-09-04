@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import heroVisual from "../../public/App-Icon-Black.svg";
+import logoBlack from "../../public/App-Icon-Black.svg";
+import logoWhite from "../../public/App-Icon-White.svg";
 import "./css/Navbar.css";
+import { getCurrentTheme } from "./themeUtils";
+
+const heroVisual = getCurrentTheme() === "dark" ? logoWhite : logoBlack;
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);

@@ -3,12 +3,22 @@ import { useNavigate } from "react-router-dom";
 import { useRef } from "react";
 import "./css/Settings.css"; 
 import Sidebar from "../components/Sidebar";
-import clearIcon from "../assets/clear.svg";
-import successIconWhite from "../assets/success.svg";
-import ErrorIconWhite from "../assets/error.svg";
+import clearIconBlack from "../assets/clearBlack.svg";
+import clearIconWhite from "../assets/clearWhite.svg";
+import successIconBlack from "../assets/successBlack.svg";
+import ErrorIconBlack from "../assets/errorBlack.svg";
+import ErrorIconWhite from "../assets/errorWhite.svg";
 import FalseIconBlack from "../assets/false-black.svg";
+import FalseIconWhite from "../assets/false-white.svg";
 import TrueIconBlack from "../assets/successBlack.svg";
+import TrueIconWhite from "../assets/successWhite.svg";
 import DarkModeToggle from "../components/DarkModeToggle";
+import CustomDropdown from "../components/CustomDropdown";
+import { getCurrentTheme } from "../components/themeUtils";
+
+const ErrorIcon = getCurrentTheme() === "dark" ? ErrorIconWhite : ErrorIconBlack;
+const FalseIcon = getCurrentTheme() === "dark" ? FalseIconWhite : FalseIconBlack;
+const TrueIcon = getCurrentTheme() === "dark" ? TrueIconWhite : TrueIconBlack;
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -301,7 +311,7 @@ export default function Settings() {
 
       <div className="settings-content">
         <div className="account-settings">
-          <h2>Kontoeinstellungen</h2>
+          <h2>Konto-Einstellungen</h2>
           <input className="smaler-input-box-width" type="text" placeholder="Benutzername" value={personalInfo.username} onChange={e => handlePersonalInfoChange("username", e.target.value)} />
           <input className="smaler-input-box-width" type="email" placeholder="Email-Adresse" value={personalInfo.email} onChange={e => handlePersonalInfoChange("email", e.target.value)} />
           <button className="save-info-btn" onClick={saveAccountInfo}>Speichern</button>
@@ -331,7 +341,7 @@ export default function Settings() {
 
             <span className="two-fa-status" style={{ display: "flex", alignItems: "center", gap: "0.25rem", marginTop: "1rem" }}>
               <img
-                src={enabled ? TrueIconBlack : FalseIconBlack}
+                src={enabled ? TrueIcon : FalseIcon}
                 alt={enabled ? "2FA aktiviert" : "2FA deaktiviert"}
                 style={{ width: "20px", height: "20px" }}
               />
@@ -416,7 +426,7 @@ export default function Settings() {
               onClick={clearBirthday}
             >
               <img
-                src={clearIcon}
+                src={getCurrentTheme() === "dark" ? clearIconBlack : clearIconWhite}
                 style={{ display: "flex", justifyContent: "center", alignItems: "center" }}
                 alt=""
               />
@@ -430,12 +440,16 @@ export default function Settings() {
           <input className="smaler-input-box-width" type="number" placeholder="z.B. 70" value={personalInfo.weight_kg} onChange={e => handlePersonalInfoChange("weight_kg", e.target.value)} />
 
           <h3>Aktivitätslevel</h3>
-          <select className="smaler-input-box-width" value={personalInfo.activity_level} onChange={e => handlePersonalInfoChange("activity_level", e.target.value)}>
-            <option value="">Bitte wählen...</option>
-            <option value="niedrig">Niedrig</option>
-            <option value="mittel">Mittel</option>
-            <option value="hoch">Hoch</option>
-          </select>
+          <CustomDropdown
+            value={personalInfo.activity_level}
+            onChange={val => handlePersonalInfoChange("activity_level", val)}
+            options={[
+              { label: "Niedrig", value: "niedrig" },
+              { label: "Mittel", value: "mittel" },
+              { label: "Hoch", value: "hoch" }
+            ]}
+            placeholder="Bitte wählen..."
+          />
 
           <h3>Ziel</h3>
           <input className="smaler-input-box-width" type="text" placeholder="z.B. fitter werden, Muskeln aufbauen" value={personalInfo.goal} onChange={e => handlePersonalInfoChange("goal", e.target.value)} />
@@ -483,7 +497,7 @@ export default function Settings() {
         >
           {toast.text}
           <img
-            src={toast.type === "success" ? successIconWhite : ErrorIconWhite}
+            src={toast.type === "success" ? successIconBlack : ErrorIcon}
             style={{ width: "20px", height: "20px", marginLeft: "8px" }}
             alt={toast.type === "success" ? "Success Icon" : "Error Icon"}
           />

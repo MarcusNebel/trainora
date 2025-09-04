@@ -1,0 +1,30 @@
+input[type="radio"] {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--green);
+  border-radius: 50%;
+  box-shadow: var(--card-shadow-md);
+  cursor: pointer;
+  position: relative;
+}
+
+input[type="radio"]:checked::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--green);
+}
+
+fieldset {
+    max-width: 10rem;
+}
+
+fieldset label {
+    cursor: pointer;
+    max-width: 10rem;
+}

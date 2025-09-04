@@ -69,6 +69,10 @@ body {
   --scrollbar-track: var(--light-bg);
   --scrollbar-thumb: var(--grayish);
   --scrollbar-thumb-hover: var(--dark-gray);
+
+  input, select {
+    box-shadow: var(--card-shadow-md);
+  }
 }
 
 /* DARK THEME */
@@ -146,10 +150,10 @@ body {
   .day-circle.active {
     color: var(--white);
   }
-  input, select {
+  input, select, .custom-dropdown__selected {
     background: var(--filled-bg);
-    border: 1px solid var(--input-border);
     color: var(--input-label);
+    box-shadow: var(--card-shadow-md);
   }
   .option-card.active {
     background: linear-gradient(to bottom, var(--superlight-blue), var(--dark-blue));
@@ -157,7 +161,7 @@ body {
   .close-button {
     color: var(--light-grayish);
   }
-  .hero-content h1, .features h2, .about-trainora .about-content h2, .logo-trainora-text h1 {
+  .hero-content h1, .features h2, .about-trainora .about-content h2, .logo-trainora-text h1, .features h3 {
     color: var(--dark-gray);
   }
 }
