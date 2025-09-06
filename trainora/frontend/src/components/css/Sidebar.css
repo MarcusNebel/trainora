@@ -178,3 +178,44 @@
   object-fit: contain;
   margin-top: 10px;
 }
+
+/* Sidebar Profilbereich */
+.sidebar-profile {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: var(--white);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow-md);
+}
+
+/* Profilbild-Wrapper wiederverwenden */
+.sidebar-profile .profile-image-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  border: 3px solid var(--green);
+  width: 50px; /* kleiner für Sidebar */
+  height: 50px;
+  background-color: var(--bg);
+  color: var(--gray);
+  font-size: 20px;
+  font-weight: bold;
+  text-transform: uppercase;
+  overflow: hidden;
+}
+
+.sidebar-profile .profile-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.sidebar-profile .username {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}

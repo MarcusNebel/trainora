@@ -161,7 +161,7 @@ body {
   .close-button {
     color: var(--light-grayish);
   }
-  .hero-content h1, .features h2, .about-trainora .about-content h2, .logo-trainora-text h1, .features h3 {
+  .hero-content h1, .features h2, .about-trainora .about-content h2, .logo-trainora-text h1, .features h3, .profile-picture-section h2 {
     color: var(--dark-gray);
   }
 }

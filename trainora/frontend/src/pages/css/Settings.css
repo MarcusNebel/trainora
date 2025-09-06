@@ -385,3 +385,101 @@ input:checked + .slider:before {
 .modal-actions .btn.save:hover {
   background: var(--dark-green);
 }
+
+
+
+/* Settings.css oder eigenes CSS-File für Profile-Picture */
+.profile-picture-section {
+  margin-bottom: 2rem;
+  display: grid;
+  gap: 0.5rem;
+  padding: 1rem;
+  background-color: var(--white);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow-md);
+}
+
+.profile-image-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+  border-radius: 50%;
+  border: var(--green) 3px solid;
+  width: 150px;
+  height: 150px;
+  background-color: var(--bg);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--gray);
+  font-size: 50px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.profile-picture-section img {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+}
+
+.profile-picture-section img {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--green);
+  box-shadow: var(--card-shadow-md);
+}
+
+.profile-picture-section input[type="file"] {
+  display: block;
+  margin-top: 1rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.profile-picture-section .upload-button {
+  background-color: var(--green);
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.profile-picture-section .upload-button:disabled {
+  background-color: var(--light-grayish);
+  cursor: not-allowed;
+}
+
+.profile-picture-section .delete-button {
+  background-color: var(--red);
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.profile-picture-section .delete-button:disabled {
+  background-color: var(--light-grayish);
+  cursor: not-allowed;
+}
+
+.profile-picture-section div {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.profile-picture-section p {
+  font-size: 0.9rem;
+  color: var(--text-secondary, #555);
+  margin-top: 0.5rem;
+}

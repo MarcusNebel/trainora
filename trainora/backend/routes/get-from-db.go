@@ -82,6 +82,34 @@ func RegisterGetRoutes(api fiber.Router, db *sql.DB) {
 			"week_plan": weekPlan,
 		})
 	})
+
+	api.Get("/get-username", AuthMiddleware, func(c *fiber.Ctx) error {
+        // Session abrufen
+        sess, err := session.Store.Get(c)
+        if err != nil {
+            return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Session nicht gefunden"})
+        }
+
+        // User-ID aus Session
+        userID, err := parseUserID(sess.Get("user_id"))
+        if err != nil {
+            return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Nicht eingeloggt"})
+        }
+
+        // Benutzernamen aus DB abrufen
+        var username string
+        err = db.QueryRow("SELECT username FROM users WHERE id = ?", userID).Scan(&username)
+        if err != nil {
+            return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+                "error":    "Benutzername konnte nicht geladen werden",
+                "db_error": err.Error(),
+            })
+        }
+
+        return c.JSON(fiber.Map{
+            "username": username,
+        })
+    })
 }
 
 // Helper-Funktion: UserID sicher in int64 konvertieren

@@ -16,9 +16,17 @@ import DarkModeToggle from "../components/DarkModeToggle";
 import CustomDropdown from "../components/CustomDropdown";
 import { getCurrentTheme } from "../components/themeUtils";
 
+interface ProfilePictureProps {
+  userId: string;
+  apiBaseUrl?: string; // Standard: "/api/profile"
+}
+
 const ErrorIcon = getCurrentTheme() === "dark" ? ErrorIconWhite : ErrorIconBlack;
 const FalseIcon = getCurrentTheme() === "dark" ? FalseIconWhite : FalseIconBlack;
 const TrueIcon = getCurrentTheme() === "dark" ? TrueIconWhite : TrueIconBlack;
+
+const userId = localStorage.getItem("user_id") || "";
+const apiBaseUrl = "/api/profile";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -33,6 +41,138 @@ export default function Settings() {
   const [twoFAQRCode, setTwoFAQRCode] = useState("");
   const [twoFASecret, setTwoFASecretCode] = useState("");
   const [twoFACode, setTwoFACode] = useState("");
+
+  const [currentImage, setCurrentImage] = useState<string | null>(null);
+  const [newFile, setNewFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [username, setUsername] = useState("");
+
+  const [deletePictureModalVisible, setDeletePictureModalVisible] = useState(false);
+  const [deletePictureModalShow, setDeletePictureModalShow] = useState(false);
+
+  const handleDeletePicture = () => {
+    setDeletePictureModalVisible(true);
+    setTimeout(() => setDeletePictureModalShow(true), 10); // für CSS-Transition
+  };
+
+  const confirmDeletePicture = async () => {
+    setDeletePictureModalShow(false); // Modal fade-out starten
+    setTimeout(async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`${apiBaseUrl}/delete/${userId}`, {
+          method: "DELETE",
+        });
+
+        if (!response.ok) throw new Error("Löschen fehlgeschlagen");
+
+        setCurrentImage(null);
+        setNewFile(null);
+        setPreview(null);
+        showToast("Profilbild gelöscht!", "success");
+      } catch (err) {
+        console.error(err);
+        showToast("Löschen fehlgeschlagen!", "error");
+      } finally {
+        setLoading(false);
+        setDeletePictureModalVisible(false); // Modal komplett schließen
+      }
+    }, 300); // Wartezeit für die CSS-Transition
+  };
+
+  function generateMonogram(name: string, size = 150): string {
+    const initials = name.split(" ").map(n => n[0]).join("").toUpperCase();
+    const canvas = document.createElement("canvas");
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext("2d")!;
+    
+    // Text
+    ctx.fillStyle = "var(--white)";
+    ctx.font = `${size / 2}px sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(initials, size / 2, size / 2);
+    
+    return canvas.toDataURL(); // Base64-Bild
+  }
+
+  useEffect(() => {
+    fetch("/api/get-username")
+      .then(res => res.json())
+      .then(data => setUsername(data.username))
+      .catch(err => console.error(err));
+  }, []);
+
+  const userInitials = username
+  ? username
+      .split(" ")
+      .map(n => n[0])
+      .join("")
+      .toUpperCase()
+  : "?";
+
+  useEffect(() => {
+    async function loadUser() {
+      const res = await fetch("/api/me", { credentials: "include" });
+      if (res.ok) {
+        const data = await res.json();
+        setUserId(data.user_id);
+      }
+    }
+    loadUser();
+  }, []);
+
+  useEffect(() => {
+    if (!userId) return;
+    fetch(`${apiBaseUrl}/pictures/${userId}`)
+      .then(res => {
+        if (res.ok) return res.blob();
+        throw new Error("Kein Bild");
+      })
+      .then(blob => {
+        const url = URL.createObjectURL(blob);
+        setCurrentImage(url);
+      })
+      .catch(() => setCurrentImage(null)); // <-- wichtig für Fallback
+  }, [userId]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setNewFile(file);
+      setPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!newFile) return;
+    setLoading(true);
+
+    const formData = new FormData();
+    formData.append("profile_picture", newFile);
+
+    try {
+      const response = await fetch(`${apiBaseUrl}/upload`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error("Upload fehlgeschlagen");
+
+      setCurrentImage(preview || null);
+      setNewFile(null);
+      setPreview(null);
+      alert("Profilbild erfolgreich hochgeladen!");
+    } catch (err) {
+      console.error(err);
+      alert("Upload fehlgeschlagen!");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const showToast = (text: string, type: "success" | "error" = "success") => {
     setToast({ text, type });
@@ -310,6 +450,70 @@ export default function Settings() {
       </div>
 
       <div className="settings-content">
+        <div className="profile-picture-section">
+          <h2>Profilbild verwalten</h2>
+          <div className="profile-image-wrapper">
+            {currentImage ? (
+              <img src={currentImage} className="profile-image" />
+            ) : username ? (
+              userInitials
+            ) : (
+              "?"
+            )}
+          </div>
+          {/* verstecktes File-Input */}
+          <input
+            type="file"
+            accept="image/*"
+            style={{ display: "none" }}
+            ref={inputRef}
+            onChange={async (e) => {
+              if (e.target.files && e.target.files[0]) {
+                const file = e.target.files[0];
+                setNewFile(file);
+                setPreview(URL.createObjectURL(file));
+
+                // Upload direkt auslösen
+                setLoading(true);
+                const formData = new FormData();
+                formData.append("profile_picture", file);
+
+                try {
+                  const response = await fetch(`${apiBaseUrl}/upload`, {
+                    method: "POST",
+                    body: formData,
+                  });
+
+                  if (!response.ok) throw new Error("Upload fehlgeschlagen");
+
+                  setCurrentImage(URL.createObjectURL(file));
+                  setNewFile(null);
+                  setPreview(null);
+                  showToast("Profilbild erfolgreich hochgeladen!", "success");
+                } catch (err) {
+                  console.error(err);
+                  showToast("Upload fehlgeschlagen!", "error");
+                } finally {
+                  setLoading(false);
+                }
+              }
+            }}
+          />
+
+          <div>
+            <button
+              className="upload-button"
+              onClick={() => inputRef.current?.click()} // öffnet das File-Input
+              disabled={loading}
+            >
+              Profilbild auswählen & hochladen
+            </button>
+            <button className="delete-button" onClick={handleDeletePicture} disabled={loading}>
+              Löschen
+            </button>
+          </div>
+        </div>
+
         <div className="account-settings">
           <h2>Konto-Einstellungen</h2>
           <input className="smaler-input-box-width" type="text" placeholder="Benutzername" value={personalInfo.username} onChange={e => handlePersonalInfoChange("username", e.target.value)} />
@@ -485,6 +689,29 @@ export default function Settings() {
             <div className="modal-actions">
               <button className="btn cancel" onClick={() => setDeleteModalShow(false)}>Abbrechen</button>
               <button className="btn delete" onClick={handleDeleteAccountConfirmed}>Löschen</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deletePictureModalVisible && (
+        <div
+          className={`modal-overlay ${deletePictureModalShow ? "show" : ""}`}
+          onClick={() => setDeletePictureModalShow(false)}
+        >
+          <div
+            className={`modal ${deletePictureModalShow ? "show" : ""}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="delete-account-header">Profilbild löschen?</h2>
+            <p className="warning-text">Dein aktuelles Profilbild wird unwiderruflich gelöscht.</p>
+            <div className="modal-actions">
+              <button className="btn cancel" onClick={() => setDeletePictureModalShow(false)}>
+                Abbrechen
+              </button>
+              <button className="btn delete" onClick={confirmDeletePicture}>
+                Löschen
+              </button>
             </div>
           </div>
         </div>

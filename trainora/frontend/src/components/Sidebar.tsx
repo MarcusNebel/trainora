@@ -1,8 +1,5 @@
-import { useState } from "react";
-import { useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import logoBlack from "../../public/App-Icon-Black.svg";
-import logoWhite from "../../public/App-Icon-White.svg";
 import settingsIconBlack from "../assets/settings.svg";
 import settingsIconWhite from "../assets/settingsWhite.svg";
 import exitIcon from "../assets/exit.svg";
@@ -14,6 +11,11 @@ const settingsIcon = getCurrentTheme() === "dark" ? settingsIconWhite : settings
 export default function Sidebar() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [username, setUsername] = useState<string>("");
+  const [userId, setUserId] = useState<number | null>(null);
+
+  const apiBaseUrl = "/api/profile";
 
   const handleLogout = async () => {
     await fetch("/api/logout", {
@@ -24,13 +26,51 @@ export default function Sidebar() {
   };
 
   useEffect(() => {
+  fetch("/api/me", { credentials: "include" })
+    .then(res => res.json())
+    .then(data => {
+      setUserId(data.user_id);
+    })
+    .catch(err => console.error(err));
+}, []);
+
+  useEffect(() => {
+    fetch("/api/get-username")
+      .then(res => res.json())
+      .then(data => setUsername(data.username))
+      .catch(err => console.error(err));
+  }, []);
+
+  useEffect(() => {
+    if (!userId) return;
+    fetch(`${apiBaseUrl}/pictures/${userId}`, { credentials: "include" })
+      .then((res) => {
+        if (res.ok) return res.blob();
+        throw new Error("Kein Bild");
+      })
+      .then((blob) => {
+        const url = URL.createObjectURL(blob);
+        setProfileImage(url);
+      })
+      .catch(() => setProfileImage(null));
+  }, [userId]);
+
+  // Initialen erzeugen
+  const initials = username
+    ? username
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+    : "?";
+
+  // Viewport Fix
+  useEffect(() => {
     const setVH = () => {
       const vh = window.visualViewport?.height || window.innerHeight;
       document.documentElement.style.setProperty("--vh", `${vh * 0.01}px`);
     };
-
     setVH();
-
     window.visualViewport?.addEventListener("resize", setVH);
     window.addEventListener("scroll", setVH);
 
@@ -41,13 +81,7 @@ export default function Sidebar() {
   }, []);
 
   useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-
-    // Cleanup für Sicherheit bei unmount
+    document.body.style.overflow = open ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
@@ -66,10 +100,15 @@ export default function Sidebar() {
       </button>
 
       <nav className={`sidebar${open ? " open" : ""}`}>
-        <div className="sidebar-head">
-          <NavLink to="/dashboard" style={{textDecoration: "none", color: "#2E7D67"}} onClick={() => setOpen(false)}>
-            <img src={getCurrentTheme() === "dark" ? logoWhite : logoBlack} alt="HealthPilot Logo" className="sidebar-logo" />
-          </NavLink>
+        <div className="sidebar-profile">
+          <div className="profile-image-wrapper">
+            {profileImage ? (
+              <img src={profileImage} alt="Profilbild" className="profile-image" />
+            ) : (
+              <span>{initials}</span>
+            )}
+          </div>
+          <p className="username">{username}</p>
         </div>
 
         <ul className="sidebar-links">
@@ -77,7 +116,7 @@ export default function Sidebar() {
             <NavLink
               to="/dashboard"
               onClick={() => setOpen(false)}
-              className={({ isActive }) => isActive ? "active-link" : ""}
+              className={({ isActive }) => (isActive ? "active-link" : "")}
             >
               Dashboard
             </NavLink>
@@ -86,7 +125,7 @@ export default function Sidebar() {
             <NavLink
               to="/quick"
               onClick={() => setOpen(false)}
-              className={({ isActive }) => isActive ? "active-link" : ""}
+              className={({ isActive }) => (isActive ? "active-link" : "")}
             >
               Quick Workout
             </NavLink>
@@ -97,7 +136,7 @@ export default function Sidebar() {
           <NavLink
             to="/settings"
             onClick={() => setOpen(false)}
-            className={({ isActive }) => isActive ? "active-link" : ""}
+            className={({ isActive }) => (isActive ? "active-link" : "")}
           >
             <img src={settingsIcon} alt="Einstellungen" className="settings-icon" /> Einstellungen
           </NavLink>
@@ -108,11 +147,9 @@ export default function Sidebar() {
           >
             <img src={exitIcon} alt="Abmelden" className="exit-icon" /> Abmelden
           </button>
-
         </div>
       </nav>
 
-      {/* Overlay für mobile Ansicht */}
       {open && <div className="sidebar-overlay" onClick={() => setOpen(false)} />}
     </>
   );

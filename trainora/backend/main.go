@@ -108,6 +108,8 @@ func main() {
 
 	routes.RegisterSetup2FARoutes(api, routes.Db)
 
+	routes.RegisterProfileRoutes(api)
+
 	// Hilfsrouten
 	api.Get("/check-email", routes.CheckEmail)
 	api.Get("/check-username", routes.CheckUsername)

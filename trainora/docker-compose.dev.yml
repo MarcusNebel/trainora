@@ -8,6 +8,7 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./backend:/app
+      - ./profile_pictures:/app/public/profile_pictures
       - session_data:/app/session_data
     ports:
       - "3000:3000"
