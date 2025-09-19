@@ -185,9 +185,7 @@
   align-items: center;
   gap: 1rem;
   padding: 1rem;
-  background-color: var(--white);
-  border-radius: 12px;
-  box-shadow: var(--card-shadow-md);
+  background: var(--white);
 }
 
 /* Profilbild-Wrapper wiederverwenden */
@@ -199,7 +197,9 @@
   border: 3px solid var(--green);
   width: 50px; /* kleiner für Sidebar */
   height: 50px;
-  background-color: var(--bg);
+  margin-top: 10px;
+  margin-bottom: 10px;
+  background: var(--bg);
   color: var(--gray);
   font-size: 20px;
   font-weight: bold;

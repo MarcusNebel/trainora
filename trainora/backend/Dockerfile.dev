@@ -1,4 +1,4 @@
-FROM golang:1.24.4-alpine
+FROM golang:1.25-alpine
 
 # Tools für Air
 RUN apk add --no-cache git curl tar
